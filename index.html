@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TimeTubes Web Version</title>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/three.js"></script>
+    <script type="text/javascript" src="js/d3.min.js"></script>
+</head>
+<body>
+<input type="file" id="fileUpload" onchange="loadFile()"><input id="Button1" type="button" value="Read" onclick="OnButtonClick();"/>
+<div id="WebGL-TimeTubes" onresize="onResize()"></div>
+<div id="scatterplots"></div>
+<div id="output"></div>
+<script type="text/javascript" src="js/loadFile.js"></script>
+<script type="text/javascript" src="js/TimeTubes.js"></script>
+<!--<script type="x-shader/x-vertex" src="shader/ShaderV.glsl" id="ShaderV"></script>-->
+<script type="x-shader/x-vertex" id="vertexShaderSimple">
+//varying vec2 vUv;                                             // fragmentShaderに渡すためのvarying変数
+struct Blazar {
+    float QI;
+    float QIe;
+    float UI;
+    float UIe;
+};
+uniform Blazar Blazars[];
+void main()
+{
+  //vUv = uv;                                                   // 処理する頂点ごとのuv(テクスチャ)座標をそのままfragmentShaderに横流しする
+  float theta = position.z / float(100);
+  float tx = position.x + position.z;
+  float ty = position.x + position.z;
+  float tz = position.z;
+  vec3 p = vec3(tx, ty, tz);
+  vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);    // 変換：ローカル座標 → 配置 → カメラ座標
+  gl_Position = projectionMatrix * mvPosition;                // 変換：カメラ座標 → 画面座標
+}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+//uniform sampler2D texture;                                    // uniform 変数としてテクスチャのデータを受け取る
+//varying vec2 vUv;                                             // vertexShaderで処理されて渡されるテクスチャ座標
+
+void main()
+{
+    gl_FragColor =vec4(1.0, 1.0, 1.0, 1.0);
+  //gl_FragColor = texture2D(texture, vUv);                     // テクスチャの色情報をそのままピクセルに塗る
+}
+</script>
+</body>
+</html>

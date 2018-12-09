@@ -16,48 +16,48 @@ function makeModel (data) {
 
 
     var points = [];
+    var radius = [];
+    var color = [];
+    // for (var i = 0; i < Object.keys(data).length - 1; ++i) {
+    //     points.push(new THREE.Vector3(0, 0, (data[i]['JD'] - data[0]['JD'])));
+    // }
     for (var i = 0; i < Object.keys(data).length - 1; ++i) {
-        points.push(new THREE.Vector3(0, 0, (data[i]['JD'] - data[0]['JD'])));
+        points.push(new THREE.Vector3(data[i]['Q/I']*100, data[i]['U/I']*100, data[i]['JD'] - data[0]['JD']));
+        radius.push(new THREE.Vector3(data[i]['E_Q/I']*100, data[i]['E_U/I']*100, data[i]['JD'] - data[0]['JD']));
+        color.push(data[i]['Flx(V)'], data[i]['V-J']);
     }
-    // var points = [];
-    // for (var i = 0; i < 20; i++) {
-    //     var randomX = -20 + Math.round(Math.random() * 50);
-    //     var randomY = -15 + Math.round(Math.random() * 40);
-    //     var randomZ = -20 + Math.round(Math.random() * 40);
-    //
-    //     points.push(new THREE.Vector3(randomX, randomY, randomZ));
-    // }
-    // var path = new THREE.CatmullRomCurve3(points);
-    // var positionData = [];
-    // for (var i = 0; i < Object.keys(data).length - 1; i++) {
-    //     positionData.push(data[i]['Q/I']);
-    //     positionData.push(data[i]['U/I']);
-    // }
-    // var positionArray = new Float32Array(positionData);
-    // const positionAttribute = new THREE.BufferAttribute(
-    //     positionArray,
-    //     2,
-    //     false
-    // );
-    var positionObj = {};
-    for (var i = 0; Object.keys(data).length - 1; i++) {
-        positionObj[i] = {JD: data[i]['JD'], QI: data[i]['Q/I'], UI: data[i]['U/I']};
-    }
-
-    var tubeGeometry = new THREE.TubeGeometry(new THREE.SplineCurve3(points), data.length, 1, 32, false);
-    // var colorMap = THREE.ImageUtils.loadTexture('img/1.png');
+    var pathPos = new THREE.SplineCurve3(points);
+    var pathRad = new THREE.SplineCurve3(radius);
+    var colors = new THREE.Float32Attribute(color);
+    var colormap = new THREE.ImageUtils.loadTexture('img/1.png');
+    var geometry = new THREE.BufferGeometry();
+    var tubeGeometry = new THREE.TubeGeometry(pathPos, data.length * 100, pathRad, 32, false);
+    // convert tubeGeometry to BufferGeometry
+    geometry.fromGeometry(tubeGeometry);
+    geometry.addAttribute('color', new THREE.BufferAttribute(colors, 2));
     var tubeMaterialShader = new THREE.ShaderMaterial({
         vertexShader: document.getElementById('vertexShaderSimple').textContent,
-        fragmentShader: document.getElementById("fragmentShader").textContent,
-            uniforms: {
-
-            }
-        // uniforms: {
-        //     texture: {type: 't', value: colorMap}
-        // }
+        fragmentShader: document.getElementById('fragmentShader').textContent,
+        uniforms: {
+            texture: {type: 't', value: colormap}
+        }
     });
-    var tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterialShader);
-    tubeMesh.castShadow = true;
+    // var colorMap = THREE.ImageUtils.loadTexture('img/1.png');
+    // var tubeMaterialShader = new THREE.ShaderMaterial({
+    //     vertexShader: document.getElementById('vertexShaderSimple').textContent,
+    //     fragmentShader: document.getElementById("fragmentShader").textContent,
+    //         uniforms: {
+    //
+    //         }
+    //     // uniforms: {
+    //     //     texture: {type: 't', value: colorMap}
+    //     // }
+    // });
+    // var tubeMaterial = new THREE.MeshLambertMaterial({
+    //     color: 0xff0000
+    // });
+    var tubeMesh = new THREE.Mesh(geometry, tubeMaterialShader);
+    // tubeMesh.castShadow = true;
     scene.add(tubeMesh);
 
     var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);

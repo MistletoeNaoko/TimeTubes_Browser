@@ -17,9 +17,6 @@
 <script type="text/javascript" src="js/TimeTubes.js"></script>
 <!--<script type="x-shader/x-vertex" src="shader/ShaderV.glsl" id="ShaderV"></script>-->
 <script type="x-shader/x-vertex" id="vertexShaderSimple">
-//varying vec2 vUv;                                             // fragmentShaderに渡すためのvarying変数
-attribute vec2 color;
-varying vec2 vColor;
 void main()
 {
   //vUv = uv;                                                   // 処理する頂点ごとのuv(テクスチャ)座標をそのままfragmentShaderに横流しする
@@ -30,23 +27,21 @@ void main()
   //vec3 p = vec3(tx, ty, tz);
   //vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);    // 変換：ローカル座標 → 配置 → カメラ座標
   //gl_Position = projectionMatrix * mvPosition;                // 変換：カメラ座標 → 画面座標
-    vColor = color;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
 }
 </script>
 
 <script id="fragmentShader" type="x-shader/x-fragment">
 uniform sampler2D texture;                                    // uniform 変数としてテクスチャのデータを受け取る
-//varying vec2 vUv;                                             // vertexShaderで処理されて渡されるテクスチャ座標
-varying vec2 vColor;
-
+//uniform int dataNum;
+//uniform vec3 FLVJArray[192];
 void main()
 {
     vec2 T;
-    T.x = (vColor.y - 1.342 ) / ( 2.252 - 1.342 );
-    T.y = (vColor.x - 0.00000000000437 ) / ( 0.0000000000792 - 0.00000000000437 );
-    //gl_FragColor = texture2D(texture, T);
-    gl_FragColor =vec4(1.0, 1.0, 1.0, 1.0);
+    T.x = 0.5;//(FLVJArray[0].x - 1.342 ) / ( 2.252 - 1.342 );
+    T.y = 0.5;//(FLVJArray[0].y - 0.00000000000437 ) / ( 0.0000000000792 - 0.00000000000437 );
+    gl_FragColor = texture2D(texture, T);
+    //gl_FragColor =vec4(1.0, 1.0, 1.0, 1.0);
   //gl_FragColor = texture2D(texture, vUv);                     // テクスチャの色情報をそのままピクセルに塗る
 }
 </script>

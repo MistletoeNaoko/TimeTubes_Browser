@@ -24,22 +24,28 @@ function makeModel (data) {
     for (var i = 0; i < Object.keys(data).length - 1; ++i) {
         points.push(new THREE.Vector3(data[i]['Q/I']*100, data[i]['U/I']*100, data[i]['JD'] - data[0]['JD']));
         radius.push(new THREE.Vector3(data[i]['E_Q/I']*100, data[i]['E_U/I']*100, data[i]['JD'] - data[0]['JD']));
-        color.push(data[i]['Flx(V)'], data[i]['V-J']);
+        color.push(new THREE.Vector3(data[i]['V-J'], data[i]['Flx(V)'], data[i]['JD'] - data[0]['JD']));
     }
     var pathPos = new THREE.SplineCurve3(points);
     var pathRad = new THREE.SplineCurve3(radius);
-    var colors = new THREE.Float32Attribute(color);
-    var colormap = new THREE.ImageUtils.loadTexture('img/1.png');
-    var geometry = new THREE.BufferGeometry();
+    // var colors = new THREE.Float32Attribute(color);
+    var textureloader = new THREE.TextureLoader();
+    textureloader.crossOrigin = 'anonymous';
+    textureloader.load('https://openclipart.org/image/2400px/svg_to_png/179452/Color-map-icon.png');
+    // textureloader.load('img/1.png');
+    var tubeTexture = THREE.ImageUtils.loadTexture('img/1.png');
+    // var geometry = new THREE.BufferGeometry();
     var tubeGeometry = new THREE.TubeGeometry(pathPos, data.length * 100, pathRad, 32, false);
     // convert tubeGeometry to BufferGeometry
-    geometry.fromGeometry(tubeGeometry);
-    geometry.addAttribute('color', new THREE.BufferAttribute(colors, 2));
+    // geometry.fromGeometry(tubeGeometry);
+    // geometry.addAttribute('color', new THREE.BufferAttribute(colors, 2));
     var tubeMaterialShader = new THREE.ShaderMaterial({
         vertexShader: document.getElementById('vertexShaderSimple').textContent,
         fragmentShader: document.getElementById('fragmentShader').textContent,
         uniforms: {
-            texture: {type: 't', value: colormap}
+            texture: {type: 't', value: textureloader}//,
+            //dataNum: {type: 'i', value: color.length},
+            //FLVJArray: {type: 'v3v', value: color}
         }
     });
     // var colorMap = THREE.ImageUtils.loadTexture('img/1.png');
@@ -56,7 +62,7 @@ function makeModel (data) {
     // var tubeMaterial = new THREE.MeshLambertMaterial({
     //     color: 0xff0000
     // });
-    var tubeMesh = new THREE.Mesh(geometry, tubeMaterialShader);
+    var tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterialShader);
     // tubeMesh.castShadow = true;
     scene.add(tubeMesh);
 

@@ -1,4 +1,6 @@
 var blazarData;
+var minmax = {};
+
 var reader = new FileReader();
 function loadFile() {
     var file = document.querySelector('input[type=file]').files[0];
@@ -14,12 +16,54 @@ function parseFile() {
         Object.keys(d).forEach(function(value) {
             d[value] = Number(d[value]);
         }, d);
-        // console.log(d);
         return d;
     });
-    // console.log(typeof data[0]);
-    // console.log(Object.keys(data[0]).length);
-    makeModel(blazarData);
+    calcMinMax(blazarData);
+    makeModel(blazarData, minmax);
+}
+
+function calcMinMax(data) {
+    minmax['min_Q/I'] = data[0]['Q/I'];
+    minmax['max_Q/I'] = data[0]['Q/I'];
+    minmax['min_U/I'] = data[0]['U/I'];
+    minmax['max_U/I'] = data[0]['U/I'];
+    minmax['min_Flx(V)'] = data[0]['Flx(V)'];
+    minmax['max_Flx(V)'] = data[0]['Flx(V)'];
+    minmax['min_V-J'] = data[0]['V-J'];
+    minmax['max_V-J'] = data[0]['V-J'];
+    for (var i = 1; i < data.length; i++) {
+        // Q/I
+        if (data[i]['Q/I'] < minmax['min_Q/I']) {
+            minmax['min_Q/I'] = data[i]['Q/I'];
+        }
+        if (data[i]['Q/I'] > minmax['max_Q/I']) {
+            minmax['max_Q/I'] = data[i]['Q/I'];
+        }
+
+        // U/I
+        if (data[i]['U/I'] < minmax['min_U/I']) {
+            minmax['min_U/I'] = data[i]['U/I'];
+        }
+        if (data[i]['U/I'] > minmax['max_U/I']) {
+            minmax['max_U/I'] = data[i]['U/I'];
+        }
+
+        // Flx
+        if (data[i]['Flx(V)'] < minmax['min_Flx(V)']) {
+            minmax['min_Flx(V)'] = data[i]['Flx(V)'];
+        }
+        if (data[i]['Flx(V)'] > minmax['max_Flx(V)']) {
+            minmax['max_Flx(V)'] = data[i]['Flx(V)'];
+        }
+
+        // V-J
+        if (data[i]['V-J'] < minmax['min_V-J']) {
+            minmax['min_V-J'] = data[i]['V-J'];
+        }
+        if (data[i]['V-J'] > minmax['max_V-J']) {
+            minmax['max_V-J'] = data[i]['V-J'];
+        }
+    }
 }
 // function OnButtonClick() {
 //     var fileRef = document.getElementById('fileUpload');

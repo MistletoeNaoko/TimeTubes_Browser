@@ -5,11 +5,11 @@
     <title>TimeTubes Web Version</title>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="js/three_tubes.js"></script>
+    <script type="text/javascript" src="js/three.min.js"></script>
     <script type="text/javascript" src="js/d3.min.js"></script>
 </head>
 <body>
-<input type="file" id="fileUpload" onchange="loadFile()"><input id="Button1" type="button" value="Read" onclick="OnButtonClick();"/>
+<input type="file" id="fileUpload" onchange="loadFile()"><input id="Button1" type="button" value="Read" onclick="OnButtonClick()"/>
 <div id="WebGL-TimeTubes" onresize="onResize()"></div>
 <div id="scatterplots"></div>
 <div id="output"></div>
@@ -17,32 +17,135 @@
 <script type="text/javascript" src="js/TimeTubes.js"></script>
 <!--<script type="x-shader/x-vertex" src="shader/ShaderV.glsl" id="ShaderV"></script>-->
 <script type="x-shader/x-vertex" id="vertexShaderSimple">
+#define MAX_DATASIZE 500
+
+//precision mediump float;
+//attribute vec4 color;
+//varying vec4 vColor;
+
+varying vec3 vNormal;
+varying vec3 vWorldPosition;
+varying vec2 vColor;
+//varying vec2 vUv;
+
+
+uniform int size;
+uniform vec3 points[MAX_DATASIZE];
+uniform vec2 radiuses[MAX_DATASIZE];
+uniform vec2 colors[MAX_DATASIZE];
+
+int dataIdx;
+
+float CatmullRom( float P0_, float P1_, float P2_, float P3_, float T_ )
+{
+    return ( ( ( -0.5 * P0_ + 1.5 * P1_ - 1.5 * P2_ + 0.5 * P3_ ) * T_
+            + P0_ - 2.5 * P1_ + 2.0 * P2_ - 0.5 * P3_ ) * T_
+            - 0.5 * P0_ + 0.5 * P2_ ) * T_
+            + P1_;
+}
+
+vec3 InterpPos(float zPos)
+{
+    // Calculate interpolated values of QI and UI from the z value
+    vec3 result;
+    int idx = 0;
+
+    // Find out the index of starting point
+    for (int i = 0; i < MAX_DATASIZE; i++) {
+        if (points[i].z <= zPos && zPos < points[i + 1].z) {
+            idx = i;
+            break;
+        }
+    }
+
+    dataIdx = idx;
+
+    float Tx = floor( zPos );
+    int   Ti = int( Tx );
+    float Td = zPos - Tx;
+
+    result.x = CatmullRom(points[Ti].x, points[Ti + 1].x, points[Ti + 2].x, points[Ti + 3].x, Td);
+    result.y = CatmullRom(points[Ti].y, points[Ti + 1].y, points[Ti + 2].y, points[Ti + 3].y, Td);
+    result.z = CatmullRom(points[Ti].z, points[Ti + 1].z, points[Ti + 2].z, points[Ti + 3].z, Td);
+
+    return result;
+}
+
+vec2 InterpRad(float zPos)
+{
+    vec2 result;
+
+    float Tx = floor( zPos );
+    int   Ti = int( Tx );
+    float Td = zPos - Tx;
+
+    result.x = CatmullRom(radiuses[Ti].x, radiuses[Ti + 1].x, radiuses[Ti + 2].x, radiuses[Ti + 3].x, Td);
+    result.y = CatmullRom(radiuses[Ti].y, radiuses[Ti + 1].y, radiuses[Ti + 2].y, radiuses[Ti + 3].y, Td);
+
+    return result;
+}
+
+vec2 InterpColor(float zPos)
+{
+    vec2 result;
+
+    float Tx = floor( zPos );
+    int   Ti = int( Tx );
+    float Td = zPos - Tx;
+
+    result.x = CatmullRom(colors[Ti].x, colors[Ti + 1].x, colors[Ti + 2].x, colors[Ti + 3].x, Td);
+    result.y = CatmullRom(colors[Ti].y, colors[Ti + 1].y, colors[Ti + 2].y, colors[Ti + 3].y, Td);
+
+    return result;
+}
+
 void main()
 {
-  //vUv = uv;                                                   // 処理する頂点ごとのuv(テクスチャ)座標をそのままfragmentShaderに横流しする
-  //float theta = position.z / float(100);
-  //float tx = position.x + position.z;
-  //float ty = position.x + position.z;
-  //float tz = position.z;
-  //vec3 p = vec3(tx, ty, tz);
-  //vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);    // 変換：ローカル座標 → 配置 → カメラ座標
-  //gl_Position = projectionMatrix * mvPosition;                // 変換：カメラ座標 → 画面座標
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    vNormal = normalMatrix * normal;
+    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+    vWorldPosition = worldPosition.xyz;
+
+    vec3 currentPos = InterpPos(position.z);
+    vec2 currentRad = InterpRad(position.z);
+    vColor = InterpColor(position.z);
+    //vColor = vec4(points[1].x, points[1].y, 2.0 / float(size), 1.0);//vec4(R, G, B, 1.0);//color;
+    vec3 P;
+
+    // Transform the straight tube based on the data
+    P.x = currentPos.x + currentRad.x * position.x;
+    P.y = currentPos.y + currentRad.y * position.y;
+    P.z = currentPos.z;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(P, 1.0);    // Transform: Camera coordinate -> Local coordinate -> transform
 }
 </script>
 
 <script id="fragmentShader" type="x-shader/x-fragment">
+#define MAX_DATASIZE 500
+//precision mediump float;
+//varying vec4 vColor;
+varying vec3 vNormal;
+varying vec3 vWorldPosition;
+varying vec2 vColor;
+//varying vec2 vUv;
+
+uniform vec3 lightPosition;
+uniform vec2 colors[MAX_DATASIZE];
+uniform vec2 minmaxVJ;
+uniform vec2 minmaxFlx;
 uniform sampler2D texture;                                    // uniform 変数としてテクスチャのデータを受け取る
-//uniform int dataNum;
-//uniform vec3 FLVJArray[192];
+
 void main()
 {
+    vec3 lightDirection = normalize(lightPosition - vWorldPosition);
     vec2 T;
-    T.x = 0.5;//(FLVJArray[0].x - 1.342 ) / ( 2.252 - 1.342 );
-    T.y = 0.5;//(FLVJArray[0].y - 0.00000000000437 ) / ( 0.0000000000792 - 0.00000000000437 );
-    gl_FragColor = texture2D(texture, T);
-    //gl_FragColor =vec4(1.0, 1.0, 1.0, 1.0);
-  //gl_FragColor = texture2D(texture, vUv);                     // テクスチャの色情報をそのままピクセルに塗る
+    T.x = (vColor.x - minmaxVJ.x) / (minmaxVJ.y - minmaxVJ.x);
+    T.y = (vColor.y - minmaxFlx.x) / (minmaxFlx.y - minmaxFlx.x);
+    T.y = 1.0 - T.y;
+    vec4 resultColor = texture2D(texture, T);
+    resultColor.a = 1.0;
+    float c = max(0.0, dot(vNormal, lightDirection)) * 0.3;
+    gl_FragColor = vec4(resultColor.r + c, resultColor.g + c, resultColor.b + c, 1.0);
+    //gl_FragColor = resultColor;
 }
 </script>
 </body>

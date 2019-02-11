@@ -19,7 +19,7 @@ function parseFile() {
         return d;
     });
     calcMinMax(blazarData);
-    makeModel(blazarData, minmax);
+    init();
 }
 
 function calcMinMax(data) {

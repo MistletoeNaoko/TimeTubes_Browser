@@ -1,9 +1,17 @@
 var camera;
 var scene;
 var renderer;
+var controls;
+var tubeMesh;
+
+function init() {
+    makeModel(blazarData, minmax);
+    animate();
+}
 
 function makeModel (data, minmax) {
-    initializeScene();
+    initializeScene('WebGL-TimeTubes');
+    addLights();
 
     var points = [];        // To create spline curve
     var positions = [];     // Pass position (Q/I, U/I) list to the shader
@@ -23,14 +31,14 @@ function makeModel (data, minmax) {
         colors.push(data[i]['Flx(V)']);
     }
     makeEdgeExtra(1);
-    addLights();
 
+    // Render a tube after finishing loading a texture
     var tubeTexture = new THREE.TextureLoader();
     tubeTexture.load('img/1_512.png', function (texture) {
         createTube(texture);
-        render('WebGL-TimeTubes');
     });
 
+    // Add extra data values to the arrays to compute Catmull splines
     function makeEdgeExtra(range) {
         let a0 = data[0];
         let a1 = data[1];
@@ -75,9 +83,9 @@ function makeModel (data, minmax) {
             colors.push(tmp['V-J']);
             colors.push(tmp['Flx(V)']);
         }
-        console.log(positions);
     }
 
+    // Add lights to the scene
     function addLights() {
         var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
         directionalLight.position.set(-20, 40, 60);
@@ -87,6 +95,7 @@ function makeModel (data, minmax) {
         scene.add(ambientLight);
     }
 
+    // Create tube based on values of data
     function createTube(texture) {
         var tubeSpline = new THREE.CatmullRomCurve3(points);
         var tubeGeometry = new THREE.TubeGeometry(  tubeSpline,
@@ -109,32 +118,58 @@ function makeModel (data, minmax) {
             },
             flatShading: true
         });
-        var tubeMesh = new THREE.Mesh(tubeGeometry, tubeShaderMaterial);
+        tubeMesh = new THREE.Mesh(tubeGeometry, tubeShaderMaterial);
         scene.add(tubeMesh);
     }
 
 }
 
-function onResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth / 2, window.innerHeight);
-}
-
-function initializeScene() {
+function initializeScene(id) {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.x = 0;
-    camera.position.y = 20;
-    camera.position.z = -50;
-    camera.lookAt(scene.position);
 
     renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(new THREE.Color(0x000000), 1.0);
-    renderer.setSize(window.innerWidth / 2, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById(id).appendChild(renderer.domElement);
+    document.addEventListener('wheel', onMouseWheel, false);
+
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.x = 0;
+    camera.position.y = 0;
+    camera.position.z = -50;
+    camera.lookAt(scene.position);
+
+    addControls();
 }
 
-function render(id) {
-    document.getElementById(id).appendChild(renderer.domElement);
+function addControls() {
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    // controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
+    controls.enableZoom = false;
+    // controls.minDistance = 100;
+    // controls.maxDistance = 500;
+    // controls.maxPolarAngle = Math.PI / 2;
+}
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function onMouseWheel(event) {
+    // 1 scroll = 100 in deltaY
+    tubeMesh.position.z = tubeMesh.position.z + event.deltaY / 100;
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+    render();
+}
+
+function render() {
     renderer.render(scene, camera);
 }

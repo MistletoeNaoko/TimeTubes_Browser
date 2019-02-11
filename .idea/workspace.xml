@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54f264b0-4a6a-4188-b6a7-9c6f14ab4bc0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js/TimeTubes.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/TimeTubes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/loadFile.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/loadFile.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/three.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/three.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -53,14 +50,14 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="glsl" value="1" />
-          <entry key="html" value="5083" />
-          <entry key="js" value="8340" />
+          <entry key="html" value="5617" />
+          <entry key="js" value="9163" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="HTML" value="5083" />
-          <entry key="JavaScript" value="8340" />
+          <entry key="HTML" value="5617" />
+          <entry key="JavaScript" value="9163" />
           <entry key="PLAIN_TEXT" value="1" />
         </counts>
       </usages-collector>
@@ -71,11 +68,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="524">
-              <caret line="145" column="58" selection-start-line="145" selection-start-column="58" selection-end-line="145" selection-end-column="58" />
+            <state relative-caret-position="644">
+              <caret line="129" column="14" selection-start-line="129" selection-start-column="14" selection-end-line="129" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -83,17 +80,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/loadFile.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="69">
+            <state relative-caret-position="483">
               <caret line="21" column="32" selection-start-line="21" selection-start-column="32" selection-end-line="21" selection-end-column="32" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/TimeTubes.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="308">
-              <caret line="39" column="26" lean-forward="true" selection-start-line="38" selection-start-column="25" selection-end-line="39" selection-end-column="26" />
+            <state relative-caret-position="-1937">
+              <caret line="24" column="19" selection-start-line="24" selection-start-column="19" selection-end-line="24" selection-end-column="19" />
             </state>
           </provider>
         </entry>
@@ -120,7 +117,14 @@
       <find>THREE.P</find>
       <find>THREE.Po</find>
       <find>THREE.Point</find>
+      <find>unshift</find>
+      <find>result\.x \= CatmullRom\(points\[Idx\]\.x\, points\[Ti \+ 1\]\.x\, points\[Ti \+ 2\]\.x\, points\[Ti \+ 3\]\.x\, Td\)\;\n    result\.y \= CatmullRom\(points\[Idx\]\.y\, points\[Ti \+ 1\]\.y\, points\[Ti \+ 2\]\.y\, points\[Ti \+ 3\]\.y\, Td\)\;\n    result\.z \= CatmullRom\(points\[Idx\]\.z\, points\[Ti \+ 1\]\.z\, points\[Ti \+ 2\]\.z\, points\[Ti \+ 3\]\.z\, Td\)\;</find>
+      <find>Td</find>
     </findStrings>
+    <replaceStrings>
+      <replace>push</replace>
+      <replace>del</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -132,8 +136,8 @@
         <option value="$PROJECT_DIR$/js/three _tubes.js" />
         <option value="$PROJECT_DIR$/js/three_tubes.js" />
         <option value="$PROJECT_DIR$/js/loadFile.js" />
-        <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/js/TimeTubes.js" />
+        <option value="$PROJECT_DIR$/index.html" />
       </list>
     </option>
   </component>
@@ -263,15 +267,15 @@
       <workItem from="1548604282152" duration="101000" />
       <workItem from="1549311620733" duration="2885000" />
       <workItem from="1549315872635" duration="4651000" />
-      <workItem from="1549473434832" duration="39336000" />
+      <workItem from="1549473434832" duration="49751000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="114292000" />
+    <option name="totallyTimeSpent" value="124707000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="953" y="0" width="974" height="1047" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49321824" weight="0.13020277" />
@@ -352,22 +356,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/loadFile.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="69">
+        <state relative-caret-position="483">
           <caret line="21" column="32" selection-start-line="21" selection-start-column="32" selection-end-line="21" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="524">
-          <caret line="145" column="58" selection-start-line="145" selection-start-column="58" selection-end-line="145" selection-end-column="58" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/TimeTubes.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="308">
-          <caret line="39" column="26" lean-forward="true" selection-start-line="38" selection-start-column="25" selection-end-line="39" selection-end-column="26" />
+        <state relative-caret-position="-1937">
+          <caret line="24" column="19" selection-start-line="24" selection-start-column="19" selection-end-line="24" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="644">
+          <caret line="129" column="14" selection-start-line="129" selection-start-column="14" selection-end-line="129" selection-end-column="14" />
         </state>
       </provider>
     </entry>

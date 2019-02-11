@@ -19,22 +19,17 @@
 <script type="x-shader/x-vertex" id="vertexShaderSimple">
 #define MAX_DATASIZE 500
 
-//precision mediump float;
-//attribute vec4 color;
-//varying vec4 vColor;
+precision mediump float;
 
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 varying vec2 vColor;
-//varying vec2 vUv;
-
+varying float vDisFlag;
 
 uniform int size;
 uniform vec3 points[MAX_DATASIZE];
 uniform vec2 radiuses[MAX_DATASIZE];
 uniform vec2 colors[MAX_DATASIZE];
-
-int dataIdx;
 
 float CatmullRom( float P0_, float P1_, float P2_, float P3_, float T_ )
 {
@@ -44,75 +39,70 @@ float CatmullRom( float P0_, float P1_, float P2_, float P3_, float T_ )
             + P1_;
 }
 
-vec3 InterpPos(float zPos)
+vec3 InterpPos(int idx, float del)
 {
     // Calculate interpolated values of QI and UI from the z value
     vec3 result;
-    int idx = 0;
+//    int idx = 0;
 
     // Find out the index of starting point
-    for (int i = 0; i < MAX_DATASIZE; i++) {
-        if (points[i].z <= zPos && zPos < points[i + 1].z) {
-            idx = i;
-            break;
-        }
-    }
+//    for (int i = 0; i < MAX_DATASIZE; i++) {
+//        if (points[i].z <= zPos && zPos < points[i + 1].z) {
+//            idx = i;
+//            break;
+//        }
+//    }
 
-    dataIdx = idx;
 
-    float Tx = floor( zPos );
-    int   Ti = int( Tx );
-    float Td = zPos - Tx;
-
-    result.x = CatmullRom(points[Ti].x, points[Ti + 1].x, points[Ti + 2].x, points[Ti + 3].x, Td);
-    result.y = CatmullRom(points[Ti].y, points[Ti + 1].y, points[Ti + 2].y, points[Ti + 3].y, Td);
-    result.z = CatmullRom(points[Ti].z, points[Ti + 1].z, points[Ti + 2].z, points[Ti + 3].z, Td);
+    result.x = CatmullRom(points[idx].x, points[idx + 1].x, points[idx + 2].x, points[idx + 3].x, del);
+    result.y = CatmullRom(points[idx].y, points[idx + 1].y, points[idx + 2].y, points[idx + 3].y, del);
+    result.z = CatmullRom(points[idx].z, points[idx + 1].z, points[idx + 2].z, points[idx + 3].z, del);
 
     return result;
 }
 
-vec2 InterpRad(float zPos)
+vec2 InterpRad(int idx, float del)
 {
     vec2 result;
 
-    float Tx = floor( zPos );
-    int   Ti = int( Tx );
-    float Td = zPos - Tx;
-
-    result.x = CatmullRom(radiuses[Ti].x, radiuses[Ti + 1].x, radiuses[Ti + 2].x, radiuses[Ti + 3].x, Td);
-    result.y = CatmullRom(radiuses[Ti].y, radiuses[Ti + 1].y, radiuses[Ti + 2].y, radiuses[Ti + 3].y, Td);
+    result.x = CatmullRom(radiuses[idx].x, radiuses[idx + 1].x, radiuses[idx + 2].x, radiuses[idx + 3].x, del);
+    result.y = CatmullRom(radiuses[idx].y, radiuses[idx + 1].y, radiuses[idx + 2].y, radiuses[idx + 3].y, del);
 
     return result;
 }
 
-vec2 InterpColor(float zPos)
+vec2 InterpColor(int idx, float del)
 {
     vec2 result;
 
-    float Tx = floor( zPos );
-    int   Ti = int( Tx );
-    float Td = zPos - Tx;
-
-    result.x = CatmullRom(colors[Ti].x, colors[Ti + 1].x, colors[Ti + 2].x, colors[Ti + 3].x, Td);
-    result.y = CatmullRom(colors[Ti].y, colors[Ti + 1].y, colors[Ti + 2].y, colors[Ti + 3].y, Td);
+    result.x = CatmullRom(colors[idx].x, colors[idx + 1].x, colors[idx + 2].x, colors[idx + 3].x, del);
+    result.y = CatmullRom(colors[idx].y, colors[idx + 1].y, colors[idx + 2].y, colors[idx + 3].y, del);
 
     return result;
 }
 
 void main()
 {
+    // Pass information on the pixel to the fragment shader to add shade
     vNormal = normalMatrix * normal;
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vWorldPosition = worldPosition.xyz;
 
-    vec3 currentPos = InterpPos(position.z);
-    vec2 currentRad = InterpRad(position.z);
-    vColor = InterpColor(position.z);
-    //vColor = vec4(points[1].x, points[1].y, 2.0 / float(size), 1.0);//vec4(R, G, B, 1.0);//color;
-    vec3 P;
+    // Compute interpolated values for the current pixel
+    float Tx = floor(position.z);
+    int   Ti = int(Tx);
+    float Td = position.z - Tx;
+    vDisFlag = 1.0;
+    if (Ti >= size - 1)
+        vDisFlag = 0.0;
+    vec3 currentPos = InterpPos(Ti, Td);
+    vec2 currentRad = InterpRad(Ti, Td);
+    vColor = InterpColor(Ti, Td);
 
     // Transform the straight tube based on the data
+    vec3 P;
     P.x = currentPos.x + currentRad.x * position.x;
+    P.x = -1.0 * P.x;
     P.y = currentPos.y + currentRad.y * position.y;
     P.z = currentPos.z;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(P, 1.0);    // Transform: Camera coordinate -> Local coordinate -> transform
@@ -121,12 +111,13 @@ void main()
 
 <script id="fragmentShader" type="x-shader/x-fragment">
 #define MAX_DATASIZE 500
-//precision mediump float;
-//varying vec4 vColor;
+
+precision mediump float;
+
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 varying vec2 vColor;
-//varying vec2 vUv;
+varying float vDisFlag;
 
 uniform vec3 lightPosition;
 uniform vec2 colors[MAX_DATASIZE];
@@ -136,6 +127,8 @@ uniform sampler2D texture;                                    // uniform 変数�
 
 void main()
 {
+    if (vDisFlag < 1.0)
+        discard;
     vec3 lightDirection = normalize(lightPosition - vWorldPosition);
     vec2 T;
     T.x = (vColor.x - minmaxVJ.x) / (minmaxVJ.y - minmaxVJ.x);
@@ -145,7 +138,6 @@ void main()
     resultColor.a = 1.0;
     float c = max(0.0, dot(vNormal, lightDirection)) * 0.3;
     gl_FragColor = vec4(resultColor.r + c, resultColor.g + c, resultColor.b + c, 1.0);
-    //gl_FragColor = resultColor;
 }
 </script>
 </body>

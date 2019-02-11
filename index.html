@@ -124,11 +124,16 @@ uniform vec3 lightPosition;
 uniform vec2 colors[MAX_DATASIZE];
 uniform vec2 minmaxVJ;
 uniform vec2 minmaxFlx;
-uniform sampler2D texture;                                    // uniform 変数としてテクスチャのデータを受け取る
+uniform sampler2D texture;
 
 void main()
 {
+    // Discard pixels out of index
     if (vDisFlag < 1.0)
+        discard;
+
+    // Discard the front side of the tube
+    if (vWorldPosition.z < 0.0)
         discard;
     vec3 lightDirection = normalize(lightPosition - vWorldPosition);
     vec2 T;

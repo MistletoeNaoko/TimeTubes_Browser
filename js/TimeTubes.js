@@ -129,11 +129,12 @@ function initializeScene(id) {
 
     renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(new THREE.Color(0x000000), 1.0);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth / 2, window.innerHeight);
     document.getElementById(id).appendChild(renderer.domElement);
     document.addEventListener('wheel', onMouseWheel, false);
 
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(45, (window.innerWidth / 2) / window.innerHeight, 0.1, 1000);
+    camera.aspect = (window.innerWidth / 2) / window.innerHeight;
     camera.position.x = 0;
     camera.position.y = 0;
     camera.position.z = -50;
@@ -154,9 +155,9 @@ function addControls() {
 }
 
 function onResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = (window.innerWidth / 2) / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth / 2, window.innerHeight);
 }
 
 function onMouseWheel(event) {

@@ -3,6 +3,7 @@ var scene;
 var renderer;
 var controls;
 var tubeMesh;
+var grid;
 
 function init() {
     makeModel(blazarData, minmax);
@@ -36,6 +37,7 @@ function makeModel (data, minmax) {
     var tubeTexture = new THREE.TextureLoader();
     tubeTexture.load('img/1_512.png', function (texture) {
         createTube(texture);
+        drawGrids(20, 10);
     });
 
     // Add extra data values to the arrays to compute Catmull splines
@@ -122,6 +124,12 @@ function makeModel (data, minmax) {
         scene.add(tubeMesh);
     }
 
+    function drawGrids(size, divisions) {
+        // Draw the current plane
+        grid = new THREE.GridHelper(size, divisions, 'white', 'limegreen');
+        grid.rotateX(Math.PI / 2);
+        scene.add(grid);
+    }
 }
 
 function initializeScene(id) {
@@ -158,6 +166,7 @@ function onResize() {
     camera.aspect = (window.innerWidth / 2) / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth / 2, window.innerHeight);
+    camera.updateProjectionMatrix();
 }
 
 function onMouseWheel(event) {

@@ -3114,7 +3114,7 @@
 
 		reflect: function () {
 
-			// reflect incident vector off plane orthogonal to normal
+			// reflect incident vector off clippingPlane orthogonal to normal
 			// normal is assumed to have unit length
 
 			var v1 = new Vector3();
@@ -5158,7 +5158,7 @@
 		intersectsPlane: function ( plane ) {
 
 			// We compute the minimum and maximum dot product values. If those values
-			// are on the same side (back or front) of the plane, then there is no intersection.
+			// are on the same side (back or front) of the clippingPlane, then there is no intersection.
 
 			var min, max;
 
@@ -5652,7 +5652,7 @@
 
 				var normal = v1.subVectors( c, b ).cross( v2.subVectors( a, b ) ).normalize();
 
-				// Q: should an error be thrown if normal is zero (e.g. degenerate plane)?
+				// Q: should an error be thrown if normal is zero (e.g. degenerate clippingPlane)?
 
 				this.setFromNormalAndCoplanarPoint( normal, a );
 
@@ -5679,7 +5679,7 @@
 
 		normalize: function () {
 
-			// Note: will lead to a divide by zero if the plane is invalid.
+			// Note: will lead to a divide by zero if the clippingPlane is invalid.
 
 			var inverseNormalLength = 1.0 / this.normal.length();
 			this.normal.multiplyScalar( inverseNormalLength );
@@ -5770,7 +5770,7 @@
 
 		intersectsLine: function ( line ) {
 
-			// Note: this tests if a line intersects the plane, not whether it (or its end-points) are coplanar with it.
+			// Note: this tests if a line intersects the clippingPlane, not whether it (or its end-points) are coplanar with it.
 
 			var startSign = this.distanceToPoint( line.start );
 			var endSign = this.distanceToPoint( line.end );
@@ -6047,7 +6047,7 @@
 
 	var bumpmap_pars_fragment = "#ifdef USE_BUMPMAP\n\tuniform sampler2D bumpMap;\n\tuniform float bumpScale;\n\tvec2 dHdxy_fwd() {\n\t\tvec2 dSTdx = dFdx( vUv );\n\t\tvec2 dSTdy = dFdy( vUv );\n\t\tfloat Hll = bumpScale * texture2D( bumpMap, vUv ).x;\n\t\tfloat dBx = bumpScale * texture2D( bumpMap, vUv + dSTdx ).x - Hll;\n\t\tfloat dBy = bumpScale * texture2D( bumpMap, vUv + dSTdy ).x - Hll;\n\t\treturn vec2( dBx, dBy );\n\t}\n\tvec3 perturbNormalArb( vec3 surf_pos, vec3 surf_norm, vec2 dHdxy ) {\n\t\tvec3 vSigmaX = vec3( dFdx( surf_pos.x ), dFdx( surf_pos.y ), dFdx( surf_pos.z ) );\n\t\tvec3 vSigmaY = vec3( dFdy( surf_pos.x ), dFdy( surf_pos.y ), dFdy( surf_pos.z ) );\n\t\tvec3 vN = surf_norm;\n\t\tvec3 R1 = cross( vSigmaY, vN );\n\t\tvec3 R2 = cross( vN, vSigmaX );\n\t\tfloat fDet = dot( vSigmaX, R1 );\n\t\tfDet *= ( float( gl_FrontFacing ) * 2.0 - 1.0 );\n\t\tvec3 vGrad = sign( fDet ) * ( dHdxy.x * R1 + dHdxy.y * R2 );\n\t\treturn normalize( abs( fDet ) * surf_norm - vGrad );\n\t}\n#endif";
 
-	var clipping_planes_fragment = "#if NUM_CLIPPING_PLANES > 0\n\tvec4 plane;\n\t#pragma unroll_loop\n\tfor ( int i = 0; i < UNION_CLIPPING_PLANES; i ++ ) {\n\t\tplane = clippingPlanes[ i ];\n\t\tif ( dot( vViewPosition, plane.xyz ) > plane.w ) discard;\n\t}\n\t#if UNION_CLIPPING_PLANES < NUM_CLIPPING_PLANES\n\t\tbool clipped = true;\n\t\t#pragma unroll_loop\n\t\tfor ( int i = UNION_CLIPPING_PLANES; i < NUM_CLIPPING_PLANES; i ++ ) {\n\t\t\tplane = clippingPlanes[ i ];\n\t\t\tclipped = ( dot( vViewPosition, plane.xyz ) > plane.w ) && clipped;\n\t\t}\n\t\tif ( clipped ) discard;\n\t#endif\n#endif";
+	var clipping_planes_fragment = "#if NUM_CLIPPING_PLANES > 0\n\tvec4 clippingPlane;\n\t#pragma unroll_loop\n\tfor ( int i = 0; i < UNION_CLIPPING_PLANES; i ++ ) {\n\t\tclippingPlane = clippingPlanes[ i ];\n\t\tif ( dot( vViewPosition, clippingPlane.xyz ) > clippingPlane.w ) discard;\n\t}\n\t#if UNION_CLIPPING_PLANES < NUM_CLIPPING_PLANES\n\t\tbool clipped = true;\n\t\t#pragma unroll_loop\n\t\tfor ( int i = UNION_CLIPPING_PLANES; i < NUM_CLIPPING_PLANES; i ++ ) {\n\t\t\tclippingPlane = clippingPlanes[ i ];\n\t\t\tclipped = ( dot( vViewPosition, clippingPlane.xyz ) > clippingPlane.w ) && clipped;\n\t\t}\n\t\tif ( clipped ) discard;\n\t#endif\n#endif";
 
 	var clipping_planes_pars_fragment = "#if NUM_CLIPPING_PLANES > 0\n\t#if ! defined( PHYSICAL ) && ! defined( PHONG ) && ! defined( MATCAP )\n\t\tvarying vec3 vViewPosition;\n\t#endif\n\tuniform vec4 clippingPlanes[ NUM_CLIPPING_PLANES ];\n#endif";
 
@@ -13552,7 +13552,7 @@
 
 			var t = - ( this.origin.dot( plane.normal ) + plane.constant ) / denominator;
 
-			// Return if the ray never intersects the plane
+			// Return if the ray never intersects the clippingPlane
 
 			return t >= 0 ? t : null;
 
@@ -13574,7 +13574,7 @@
 
 		intersectsPlane: function ( plane ) {
 
-			// check if the ray lies on the plane first
+			// check if the ray lies on the clippingPlane first
 
 			var distToPoint = plane.distanceToPoint( this.origin );
 
@@ -13592,7 +13592,7 @@
 
 			}
 
-			// ray origin is behind the plane (and is pointing behind it)
+			// ray origin is behind the clippingPlane (and is pointing behind it)
 
 			return false;
 
@@ -21653,7 +21653,7 @@
 		camera.matrixWorldInverse.getInverse( camera.matrixWorld );
 
 		// Find the union of the frustum values of the cameras and scale
-		// the values so that the near plane's position does not change in world space,
+		// the values so that the near clippingPlane's position does not change in world space,
 		// although must now be relative to the new union camera.
 		var near2 = near + zOffset;
 		var far2 = far + zOffset;
@@ -27407,7 +27407,7 @@
 		}
 
 
-		// Angle above the XZ plane.
+		// Angle above the XZ clippingPlane.
 
 		function inclination( vector ) {
 
@@ -27992,7 +27992,7 @@
 			for ( j = 0; j <= radialSegments; ++ j ) {
 
 				// now calculate the vertices. they are nothing more than an extrusion of the torus curve.
-				// because we extrude a shape in the xy-plane, there is no need to calculate a z-value.
+				// because we extrude a shape in the xy-clippingPlane, there is no need to calculate a z-value.
 
 				var v = j / radialSegments * Math.PI * 2;
 				var cx = - tube * Math.cos( v );
@@ -36809,7 +36809,7 @@
 
 	/**
 	 * @author zz85 / http://www.lab4games.net/zz85/blog
-	 * Defines a 2d shape plane using paths.
+	 * Defines a 2d shape clippingPlane using paths.
 	 **/
 
 	// STEP 1 Create a path.
@@ -43670,7 +43670,7 @@
 
 			} else if ( ( camera && camera.isOrthographicCamera ) ) {
 
-				this.ray.origin.set( coords.x, coords.y, ( camera.near + camera.far ) / ( camera.near - camera.far ) ).unproject( camera ); // set origin in plane of camera
+				this.ray.origin.set( coords.x, coords.y, ( camera.near + camera.far ) / ( camera.near - camera.far ) ).unproject( camera ); // set origin in clippingPlane of camera
 				this.ray.direction.set( 0, 0, - 1 ).transformDirection( camera.matrixWorld );
 
 			} else {
@@ -43813,9 +43813,9 @@
 
 	function Cylindrical( radius, theta, y ) {
 
-		this.radius = ( radius !== undefined ) ? radius : 1.0; // distance from the origin to a point in the x-z plane
-		this.theta = ( theta !== undefined ) ? theta : 0; // counterclockwise angle in the x-z plane measured in radians from the positive z-axis
-		this.y = ( y !== undefined ) ? y : 0; // height above the x-z plane
+		this.radius = ( radius !== undefined ) ? radius : 1.0; // distance from the origin to a point in the x-z clippingPlane
+		this.theta = ( theta !== undefined ) ? theta : 0; // counterclockwise angle in the x-z clippingPlane measured in radians from the positive z-axis
+		this.y = ( y !== undefined ) ? y : 0; // height above the x-z clippingPlane
 
 		return this;
 
@@ -46452,7 +46452,7 @@
 		},
 		plane: function ( target ) {
 
-			console.warn( 'THREE.Triangle: .plane() has been renamed to .getPlane().' );
+			console.warn( 'THREE.Triangle: .clippingPlane() has been renamed to .getPlane().' );
 			return this.getPlane( target );
 
 		}

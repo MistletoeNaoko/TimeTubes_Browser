@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>TimeTubes Web Version</title>
-    <script type="text/javascript" src="js/jquery.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="js/three.min.js"></script>
-    <script type="text/javascript" src="js/d3.min.js"></script>
-    <script type="text/javascript" src="js/OrbitControls.js"></script>
+    <script type="text/javascript" src="js/lib/jquery.min.js"></script>
+    <script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/lib/three.min.js"></script>
+    <script type="text/javascript" src="js/lib/d3.min.js"></script>
+    <script type="text/javascript" src="js/lib/OrbitControls.js"></script>
 </head>
 <body onresize="onResize()">
 <input type="file" id="fileUpload" onchange="loadFile()"><input id="Button1" type="button" value="Read" onclick="OnButtonClick()"/>
-<div id="WebGL-TimeTubes" onresize="onResize()"></div>
+<div id="WebGL-TimeTubes"></div>
 <div id="scatterplots"></div>
 <div id="output"></div>
 <script type="text/javascript" src="js/loadFile.js"></script>
 <script type="text/javascript" src="js/TimeTubes.js"></script>
-<!--<script type="x-shader/x-vertex" src="shader/ShaderV.glsl" id="ShaderV"></script>-->
 <script type="x-shader/x-vertex" id="vertexShaderSimple">
 #define MAX_DATASIZE 500
 
@@ -32,6 +31,9 @@ uniform vec3 points[MAX_DATASIZE];
 uniform vec2 radiuses[MAX_DATASIZE];
 uniform vec2 colors[MAX_DATASIZE];
 
+// How to add clipping planes to shader: https://stackoverflow.com/questions/42532545/add-clipping-to-three-shadermaterial
+#include <clipping_planes_pars_vertex>
+
 float CatmullRom( float P0_, float P1_, float P2_, float P3_, float T_ )
 {
     return ( ( ( -0.5 * P0_ + 1.5 * P1_ - 1.5 * P2_ + 0.5 * P3_ ) * T_
@@ -44,16 +46,6 @@ vec3 InterpPos(int idx, float del)
 {
     // Calculate interpolated values of QI and UI from the z value
     vec3 result;
-//    int idx = 0;
-
-    // Find out the index of starting point
-//    for (int i = 0; i < MAX_DATASIZE; i++) {
-//        if (points[i].z <= zPos && zPos < points[i + 1].z) {
-//            idx = i;
-//            break;
-//        }
-//    }
-
 
     result.x = CatmullRom(points[idx].x, points[idx + 1].x, points[idx + 2].x, points[idx + 3].x, del);
     result.y = CatmullRom(points[idx].y, points[idx + 1].y, points[idx + 2].y, points[idx + 3].y, del);
@@ -84,6 +76,8 @@ vec2 InterpColor(int idx, float del)
 
 void main()
 {
+    #include <begin_vertex>
+
     // Pass information on the pixel to the fragment shader to add shade
     vNormal = normalMatrix * normal;
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
@@ -107,6 +101,8 @@ void main()
     P.y = currentPos.y + currentRad.y * position.y;
     P.z = currentPos.z;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(P, 1.0);    // Transform: Camera coordinate -> Local coordinate -> transform
+    vec4 mvPosition = modelViewMatrix * vec4(P, 1.0);
+    #include <clipping_planes_vertex>
 }
 </script>
 
@@ -126,15 +122,15 @@ uniform vec2 minmaxVJ;
 uniform vec2 minmaxFlx;
 uniform sampler2D texture;
 
+#include <clipping_planes_pars_fragment>
+
 void main()
 {
+    #include <clipping_planes_fragment>
     // Discard pixels out of index
     if (vDisFlag < 1.0)
         discard;
 
-    // Discard the front side of the tube
-    if (vWorldPosition.z < 0.0)
-        discard;
     vec3 lightDirection = normalize(lightPosition - vWorldPosition);
     vec2 T;
     T.x = (vColor.x - minmaxVJ.x) / (minmaxVJ.y - minmaxVJ.x);

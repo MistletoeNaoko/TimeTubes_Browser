@@ -4,13 +4,14 @@ var renderer;
 var controls;
 var tubeMesh;
 var grid;
+var clippingPlane;
 
 function init() {
-    makeModel(blazarData, minmax);
+    makeModel(blazarData, blazarMin, blazarMax);
     animate();
 }
 
-function makeModel (data, minmax) {
+function makeModel (data, minList, maxList) {
     initializeScene('WebGL-TimeTubes');
     addLights();
 
@@ -115,17 +116,19 @@ function makeModel (data, minmax) {
                 size: {value: data.length},
                 texture: {value: texture},
                 lightPosition: {value: new THREE.Vector3(-20, 40, 60)},
-                minmaxVJ: {value: new THREE.Vector2(minmax['min_V-J'], minmax['max_V-J'])},
-                minmaxFlx: {value: new THREE.Vector2(minmax['min_Flx(V)'], minmax['max_Flx(V)'])}
+                minmaxVJ: {value: new THREE.Vector2(minList['V-J'], maxList['V-J'])},
+                minmaxFlx: {value: new THREE.Vector2(minList['Flx(V)'], maxList['Flx(V)'])}
             },
-            flatShading: true
+            flatShading: true,
+            clipping: true,
+            clippingPlanes: [clippingPlane]
         });
         tubeMesh = new THREE.Mesh(tubeGeometry, tubeShaderMaterial);
         scene.add(tubeMesh);
     }
 
     function drawGrids(size, divisions) {
-        // Draw the current plane
+        // Draw the current clippingPlane
         grid = new THREE.GridHelper(size, divisions, 'white', 'limegreen');
         grid.rotateX(Math.PI / 2);
         scene.add(grid);
@@ -138,8 +141,11 @@ function initializeScene(id) {
     renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(new THREE.Color(0x000000), 1.0);
     renderer.setSize(window.innerWidth / 2, window.innerHeight);
+    renderer.localClippingEnabled = true;
     document.getElementById(id).appendChild(renderer.domElement);
     document.addEventListener('wheel', onMouseWheel, false);
+
+    clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
     camera = new THREE.PerspectiveCamera(45, (window.innerWidth / 2) / window.innerHeight, 0.1, 1000);
     camera.aspect = (window.innerWidth / 2) / window.innerHeight;
@@ -171,7 +177,7 @@ function onResize() {
 
 function onMouseWheel(event) {
     // 1 scroll = 100 in deltaY
-    tubeMesh.position.z = tubeMesh.position.z + event.deltaY / 100;
+    tubeMesh.position.z = tubeMesh.position.z - event.deltaY / 100;
 }
 
 function animate() {

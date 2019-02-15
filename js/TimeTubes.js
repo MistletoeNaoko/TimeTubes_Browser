@@ -10,72 +10,8 @@ function init() {
 
     initializeScene('WebGL-TimeTubes');
     addLights();
-    // createUnitTubeGeometry(blazarData);
     makeModel(blazarData, blazarMin, blazarMax);
     animate();
-}
-function createUnitTubeGeometry(data) {
-    let DivX = 32;
-    let DivY = 32;
-    let DivZ = 32;
-    let DZ = DivZ;
-    let R, A;
-    let P = new THREE.Vector3(0, 0, 0);
-    let T = new THREE.Vector2(0, 0);
-    var vertexPositions = [];
-    var indices = [];
-    let PsN = (data.length - 1) * DZ * (DivY + 1) * (DivX + 1);
-    let EnN = (data.length - 1) * DZ * 2 * (DivY) * (DivX);
-    for (let N = 0; N < data.length - 1; N++) {
-        for (let Z = 1; Z <= DZ; Z++) {
-            R = Z / DZ;
-            for (let Y = 0; Y <= DivY; Y++) {
-                P.z = N + Y / DivY;
-                T.y = 1 + P.z;
-                for (let X = 0; X <= DivX; X++) {
-                    T.x = X / DivX;
-                    A = Math.PI * 2 * T.x;
-                    P.x = R * Math.cos(A);
-                    P.y = R * Math.sin(A);
-
-                    vertexPositions.push(P.x);
-                    vertexPositions.push(P.y);
-                    vertexPositions.push(P.z);
-                }
-            }
-        }
-    }
-
-    for (let N = data.length - 2; N >= 0; N--) {
-        for (let Z = 0; Z < DZ; Z++) {
-            for (let Y = 0; Y < DivY; Y++) {
-                for (let X = 0; X < DivX; X++) {
-                    indices.push(IYXtoJ(N, Z, X + 0, Y + 0));
-                    indices.push(IYXtoJ(N, Z, X + 1, Y + 0));
-                    indices.push(IYXtoJ(N, Z, X + 1, Y + 1));
-
-                    indices.push(IYXtoJ(N, Z, X + 1, Y + 1));
-                    indices.push(IYXtoJ(N, Z, X + 1, Y + 0));
-                    indices.push(IYXtoJ(N, Z, X + 0, Y + 0));
-                }
-            }
-        }
-    }
-    var vertices = new Float32Array(vertexPositions);
-    var indexes = new Uint16Array(indices);
-    var geometry = new THREE.BufferGeometry();
-    geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    // geometry.setIndex(new THREE.BufferAttribute(indexes, 1));
-    // var material = new THREE.MeshLambertMaterial({
-    //     color: 0xff0000
-    // });
-    // var mesh = new THREE.Mesh(geometry, material);
-    var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-    var mesh = new THREE.Mesh( geometry, material );
-    scene.add(mesh);
-    function IYXtoJ(I, Z, X, Y) {
-        return ((I  * DZ + Z) * (DivY + 1) + Y) * (DivX + 1) + X;
-    }
 }
 function makeModel (data, minList, maxList) {
     console.log(data);
@@ -107,10 +43,6 @@ function makeModel (data, minList, maxList) {
         console.log( 'createTube: 実行時間 = ' + (end - start) + 'ミリ秒' );
 
         drawGrids(20, 10);
-        // start = performance.now();
-        // render();
-        // end = performance.now();
-        // console.log( 'render: 実行時間 = ' + (end - start) + 'ミリ秒' );
     });
 
     // Add extra data values to the arrays to compute Catmull splines
@@ -162,11 +94,13 @@ function makeModel (data, minList, maxList) {
 
     // Create tube based on values of data
     function createTube(texture) {
+        let start, end;
         var tubeSpline = new THREE.CatmullRomCurve3(points);
         var tubeNum = 32;
 
         var tubeGeometry;
         var geometries = [];
+        start = performance.now();
         for (let i = 0; i < tubeNum; i++) {
             const geometryTmp = new THREE.TubeBufferGeometry(
                                                 tubeSpline,
@@ -176,7 +110,14 @@ function makeModel (data, minList, maxList) {
                                                 false);
             geometries.push(geometryTmp);
         }
+        end = performance.now();
+        console.log('create geometry: ' + (end - start));
+        start = performance.now();
         tubeGeometry = THREE.BufferGeometryUtils.mergeBufferGeometries(geometries);
+
+        end = performance.now();
+        console.log('merge geometry: ' + (end - start));
+        start = performance.now();
         var tubeShaderMaterial = new THREE.ShaderMaterial({
             vertexShader: document.getElementById('vertexShaderSimple').textContent,
             fragmentShader: document.getElementById('fragmentShader').textContent,
@@ -191,15 +132,17 @@ function makeModel (data, minList, maxList) {
                 minmaxFlx: {value: new THREE.Vector2(minList['Flx(V)'], maxList['Flx(V)'])},
                 viewVector: { value: camera.position }
             },
-            //flatShading: true,
-            // depthTest: false,
             side: THREE.DoubleSide,
-            // depthWrite: false,
             transparent: true,
             clipping: true,
             clippingPlanes: [clippingPlane]
         });
+        end = performance.now();
+        console.log('create material: ' + (end - start));
+        start = performance.now();
         tubeMesh = new THREE.Mesh(tubeGeometry, tubeShaderMaterial);
+        end = performance.now();
+        console.log('create mesh: ' + (end - start));
         scene.add(tubeMesh);
     }
 

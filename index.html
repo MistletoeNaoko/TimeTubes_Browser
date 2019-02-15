@@ -3,17 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>TimeTubes Web Version</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
     <script type="text/javascript" src="js/lib/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/lib/three.min.js"></script>
     <script type="text/javascript" src="js/lib/d3.min.js"></script>
     <script type="text/javascript" src="js/lib/OrbitControls.js"></script>
+    <script type="text/javascript" src="js/lib/BufferGeometryUtils.js"></script>
 </head>
 <body onresize="onResize()">
-<input type="file" id="fileUpload" onchange="loadFile()"><input id="Button1" type="button" value="Read" onclick="OnButtonClick()"/>
-<div id="WebGL-TimeTubes"></div>
-<div id="scatterplots"></div>
-<div id="output"></div>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">TimeTubes browser</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">About<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Data</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Visualization</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                    <a class="dropdown-item" href="#">TimeTubes</a>
+                    <a class="dropdown-item" href="#">Another action</a>
+                    <a class="dropdown-item" href="#">Something else here</a>
+                </div>
+            </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </div>
+</nav>
+
+<main role="main" class="container">
+    <div class="starter-template">
+        <h1>Bootstrap starter template</h1>
+        <input type="file" id="fileUpload" onchange="loadFile()"><input id="Button1" type="button" value="Read" onclick="OnButtonClick()"/>
+        <div id="WebGL-TimeTubes"></div>
+        <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
+    </div>
+
+</main><!-- /.container -->
+
+
 <script type="text/javascript" src="js/loadFile.js"></script>
 <script type="text/javascript" src="js/TimeTubes.js"></script>
 <script type="x-shader/x-vertex" id="vertexShaderSimple">
@@ -23,6 +66,7 @@ precision mediump float;
 
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
+varying float vPositionx;
 varying vec2 vColor;
 varying float vDisFlag;
 
@@ -77,7 +121,7 @@ vec2 InterpColor(int idx, float del)
 void main()
 {
     #include <begin_vertex>
-
+    //vPositionx = sqrt(position.x * position.x + position.y * position.y);
     // Pass information on the pixel to the fragment shader to add shade
     vNormal = normalMatrix * normal;
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
@@ -108,11 +152,13 @@ void main()
 
 <script id="fragmentShader" type="x-shader/x-fragment">
 #define MAX_DATASIZE 500
+#define TUBE_NUM 32
 
 precision mediump float;
 
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
+varying float vPositionx;
 varying vec2 vColor;
 varying float vDisFlag;
 
@@ -139,7 +185,8 @@ void main()
     vec4 resultColor = texture2D(texture, T);
     resultColor.a = 1.0;
     float c = max(0.0, dot(vNormal, lightDirection)) * 0.3;
-    gl_FragColor = vec4(resultColor.r + c, resultColor.g + c, resultColor.b + c, 1.0);
+    float opacity = 1.0 / float(TUBE_NUM);//vPositionx;//vWorldPosition.x;//1.0 / float(TUBE_NUM);
+    gl_FragColor = vec4(resultColor.r + c, resultColor.g + c, resultColor.b + c, opacity);
 }
 </script>
 </body>

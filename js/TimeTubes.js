@@ -7,14 +7,78 @@ var grid;
 var clippingPlane;
 
 function init() {
+
+    initializeScene('WebGL-TimeTubes');
+    addLights();
+    // createUnitTubeGeometry(blazarData);
     makeModel(blazarData, blazarMin, blazarMax);
     animate();
 }
+function createUnitTubeGeometry(data) {
+    let DivX = 32;
+    let DivY = 32;
+    let DivZ = 32;
+    let DZ = DivZ;
+    let R, A;
+    let P = new THREE.Vector3(0, 0, 0);
+    let T = new THREE.Vector2(0, 0);
+    var vertexPositions = [];
+    var indices = [];
+    let PsN = (data.length - 1) * DZ * (DivY + 1) * (DivX + 1);
+    let EnN = (data.length - 1) * DZ * 2 * (DivY) * (DivX);
+    for (let N = 0; N < data.length - 1; N++) {
+        for (let Z = 1; Z <= DZ; Z++) {
+            R = Z / DZ;
+            for (let Y = 0; Y <= DivY; Y++) {
+                P.z = N + Y / DivY;
+                T.y = 1 + P.z;
+                for (let X = 0; X <= DivX; X++) {
+                    T.x = X / DivX;
+                    A = Math.PI * 2 * T.x;
+                    P.x = R * Math.cos(A);
+                    P.y = R * Math.sin(A);
 
+                    vertexPositions.push(P.x);
+                    vertexPositions.push(P.y);
+                    vertexPositions.push(P.z);
+                }
+            }
+        }
+    }
+
+    for (let N = data.length - 2; N >= 0; N--) {
+        for (let Z = 0; Z < DZ; Z++) {
+            for (let Y = 0; Y < DivY; Y++) {
+                for (let X = 0; X < DivX; X++) {
+                    indices.push(IYXtoJ(N, Z, X + 0, Y + 0));
+                    indices.push(IYXtoJ(N, Z, X + 1, Y + 0));
+                    indices.push(IYXtoJ(N, Z, X + 1, Y + 1));
+
+                    indices.push(IYXtoJ(N, Z, X + 1, Y + 1));
+                    indices.push(IYXtoJ(N, Z, X + 1, Y + 0));
+                    indices.push(IYXtoJ(N, Z, X + 0, Y + 0));
+                }
+            }
+        }
+    }
+    var vertices = new Float32Array(vertexPositions);
+    var indexes = new Uint16Array(indices);
+    var geometry = new THREE.BufferGeometry();
+    geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    // geometry.setIndex(new THREE.BufferAttribute(indexes, 1));
+    // var material = new THREE.MeshLambertMaterial({
+    //     color: 0xff0000
+    // });
+    // var mesh = new THREE.Mesh(geometry, material);
+    var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+    var mesh = new THREE.Mesh( geometry, material );
+    scene.add(mesh);
+    function IYXtoJ(I, Z, X, Y) {
+        return ((I  * DZ + Z) * (DivY + 1) + Y) * (DivX + 1) + X;
+    }
+}
 function makeModel (data, minList, maxList) {
-    initializeScene('WebGL-TimeTubes');
-    addLights();
-
+    console.log(data);
     var points = [];        // To create spline curve
     var positions = [];     // Pass position (Q/I, U/I) list to the shader
     var radiuses = [];      // Pass radius (E_Q/I, E_U/I) list to the shader
@@ -36,9 +100,17 @@ function makeModel (data, minList, maxList) {
 
     // Render a tube after finishing loading a texture
     var tubeTexture = new THREE.TextureLoader();
-    tubeTexture.load('img/1_512.png', function (texture) {
+    tubeTexture.load('img/1_256.png', function (texture) {
+        let start = performance.now();
         createTube(texture);
+        let end = performance.now();
+        console.log( 'createTube: 実行時間 = ' + (end - start) + 'ミリ秒' );
+
         drawGrids(20, 10);
+        // start = performance.now();
+        // render();
+        // end = performance.now();
+        // console.log( 'render: 実行時間 = ' + (end - start) + 'ミリ秒' );
     });
 
     // Add extra data values to the arrays to compute Catmull splines
@@ -88,24 +160,23 @@ function makeModel (data, minList, maxList) {
         }
     }
 
-    // Add lights to the scene
-    function addLights() {
-        var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
-        directionalLight.position.set(-20, 40, 60);
-        scene.add(directionalLight);
-
-        var ambientLight = new THREE.AmbientLight(0x292929);
-        scene.add(ambientLight);
-    }
-
     // Create tube based on values of data
     function createTube(texture) {
         var tubeSpline = new THREE.CatmullRomCurve3(points);
-        var tubeGeometry = new THREE.TubeGeometry(  tubeSpline,
-                                                    5 * Math.ceil(data[data.length - 1]['JD'] - data[0]['JD']),
-                                                    1,
-                                                    32,
-                                                    false);
+        var tubeNum = 32;
+
+        var tubeGeometry;
+        var geometries = [];
+        for (let i = 0; i < tubeNum; i++) {
+            const geometryTmp = new THREE.TubeBufferGeometry(
+                                                tubeSpline,
+                                                5 * Math.ceil(data[data.length - 1]['JD'] - data[0]['JD']),
+                                                (1 / tubeNum) * (i + 1),
+                                                32,
+                                                false);
+            geometries.push(geometryTmp);
+        }
+        tubeGeometry = THREE.BufferGeometryUtils.mergeBufferGeometries(geometries);
         var tubeShaderMaterial = new THREE.ShaderMaterial({
             vertexShader: document.getElementById('vertexShaderSimple').textContent,
             fragmentShader: document.getElementById('fragmentShader').textContent,
@@ -117,9 +188,14 @@ function makeModel (data, minList, maxList) {
                 texture: {value: texture},
                 lightPosition: {value: new THREE.Vector3(-20, 40, 60)},
                 minmaxVJ: {value: new THREE.Vector2(minList['V-J'], maxList['V-J'])},
-                minmaxFlx: {value: new THREE.Vector2(minList['Flx(V)'], maxList['Flx(V)'])}
+                minmaxFlx: {value: new THREE.Vector2(minList['Flx(V)'], maxList['Flx(V)'])},
+                viewVector: { value: camera.position }
             },
-            flatShading: true,
+            //flatShading: true,
+            // depthTest: false,
+            side: THREE.DoubleSide,
+            // depthWrite: false,
+            transparent: true,
             clipping: true,
             clippingPlanes: [clippingPlane]
         });
@@ -144,7 +220,7 @@ function initializeScene(id) {
     renderer.localClippingEnabled = true;
     document.getElementById(id).appendChild(renderer.domElement);
     document.addEventListener('wheel', onMouseWheel, false);
-
+    // renderer.sortObjects = false;
     clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
     camera = new THREE.PerspectiveCamera(45, (window.innerWidth / 2) / window.innerHeight, 0.1, 1000);
@@ -155,6 +231,16 @@ function initializeScene(id) {
     camera.lookAt(scene.position);
 
     addControls();
+}
+
+// Add lights to the scene
+function addLights() {
+    var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+    directionalLight.position.set(-20, 40, 60);
+    scene.add(directionalLight);
+
+    var ambientLight = new THREE.AmbientLight(0x292929);
+    scene.add(ambientLight);
 }
 
 function addControls() {
@@ -170,7 +256,7 @@ function addControls() {
 
 function onResize() {
     camera.aspect = (window.innerWidth / 2) / window.innerHeight;
-    camera.updateProjectionMatrix();
+    // camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth / 2, window.innerHeight);
     camera.updateProjectionMatrix();
 }
@@ -187,5 +273,6 @@ function animate() {
 }
 
 function render() {
+    // document.getElementById('WebGL-TimeTubes').appendChild(renderer.domElement);
     renderer.render(scene, camera);
 }

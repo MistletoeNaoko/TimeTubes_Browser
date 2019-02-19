@@ -6,59 +6,67 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="css/style.css">
-
-    <script type="text/javascript" src="js/lib/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/lib/three.min.js"></script>
     <script type="text/javascript" src="js/lib/d3.min.js"></script>
     <script type="text/javascript" src="js/lib/OrbitControls.js"></script>
     <script type="text/javascript" src="js/lib/BufferGeometryUtils.js"></script>
+    <script type="text/javascript" src="js/lib/dat.gui.min.js"></script>
 </head>
 <body onresize="onResize()">
-<input type="file" id="fileUpload" onchange="loadFile()"><input id="Button1" type="button" value="Read" onclick="OnButtonClick()"/>
-<div id="WebGL-TimeTubes"></div>
-<!--<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">-->
-    <!--<a class="navbar-brand" href="#">TimeTubes browser</a>-->
-    <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">-->
-        <!--<span class="navbar-toggler-icon"></span>-->
-    <!--</button>-->
 
-    <!--<div class="collapse navbar-collapse" id="navbarsExampleDefault">-->
-        <!--<ul class="navbar-nav mr-auto">-->
-            <!--<li class="nav-item active">-->
-                <!--<a class="nav-link" href="#">About<span class="sr-only">(current)</span></a>-->
-            <!--</li>-->
-            <!--<li class="nav-item">-->
-                <!--<a class="nav-link" href="#">Data</a>-->
-            <!--</li>-->
-            <!--<li class="nav-item dropdown">-->
-                <!--<a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Visualization</a>-->
-                <!--<div class="dropdown-menu" aria-labelledby="dropdown01">-->
-                    <!--<a class="dropdown-item" href="#">TimeTubes</a>-->
-                    <!--<a class="dropdown-item" href="#">Another action</a>-->
-                    <!--<a class="dropdown-item" href="#">Something else here</a>-->
+
+<div class="tab_wrap">
+    <div class="tab_area">
+        <label class="tab_label active" for="tab1">Data</label>
+        <label class="tab_label" for="tab2">tab2</label>
+        <label class="tab_label" for="tab3">tab3</label>
+    </div>
+    <div class="panel_area">
+        <div id="panel1" class="tab_panel active">
+            <p>
+                <input type="file" id="fileUpload" onchange="loadFile()">
+                <div id="data_list">
+                    <table class="table table-hover table-bordered" id="data_list_table">
+                        <thead>
+                            <tr>
+                                <th>Index</th>
+                                <th>File name</th>
+                                <th>Variables</th>
+                                <th>File size (KB)</th>
+                                <!--<th>Format</th>-->
+                            </tr>
+                        </thead>
+                        <tbody id="data_list_body">
+                        </tbody>
+                    </table>
+                </div>
+                <div style="overflow: scroll" class="scrollbox" id="show_data">
+
+                </div>
+            </p>
+        </div>
+        <div id="panel2" class="tab_panel">
+            <p>
+                <div id="WebGL-TimeTubes"></div>
+                <!--<div class="container">-->
+                    <!--<div class="row">-->
+                        <!--<div class="col-10" id="WebGL-TimeTubes" align="left">-->
+                        <!--</div>-->
+                        <!--<div class="col-2"></div>-->
+                    <!--</div>-->
                 <!--</div>-->
-            <!--</li>-->
-        <!--</ul>-->
-        <!--<form class="form-inline my-2 my-lg-0">-->
-            <!--<input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">-->
-            <!--<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>-->
-        <!--</form>-->
-    <!--</div>-->
-<!--</nav>-->
-
-<!--<main role="main" class="container">-->
-    <!--<div class="starter-template">-->
-        <!--<h1>Bootstrap starter template</h1>-->
-        <!--<input type="file" id="fileUpload" onchange="loadFile()"><input id="Button1" type="button" value="Read" onclick="OnButtonClick()"/>-->
-        <!--<div id="WebGL-TimeTubes"></div>-->
-        <!--<p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>-->
-    <!--</div>-->
-
-<!--</main>&lt;!&ndash; /.container &ndash;&gt;-->
-
-
+            </p>
+        </div>
+        <div id="panel3" class="tab_panel">
+            <p>panel3</p>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="js/updateDataListTable.js"></script>
+<script type="text/javascript" src="js/switchTab.js"></script>
 <script type="text/javascript" src="js/loadFile.js"></script>
 <script type="text/javascript" src="js/TimeTubes.js"></script>
 <script type="x-shader/x-vertex" id="vertexShaderSimple">
@@ -154,7 +162,7 @@ void main()
 
 <script id="fragmentShader" type="x-shader/x-fragment">
 #define MAX_DATASIZE 500
-#define TUBE_NUM 32
+#define TUBE_NUM 1
 
 precision mediump float;
 

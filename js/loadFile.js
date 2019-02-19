@@ -1,17 +1,21 @@
-var blazarData;
+var blazarData = [];
 var blazarMin = {};
 var blazarMax = {};
+
+var files = [];
 
 var reader = new FileReader();
 function loadFile() {
     var file = document.querySelector('input[type=file]').files[0];
+    files.push(file);
+    reader.readAsText(file);
     reader.addEventListener("load", parseFile, false);
-    if (file) {
-        reader.readAsText(file);
-    }
+    // if (file) {
+    //     reader.readAsText(file);
+    // }
 }
 function parseFile() {
-    blazarData = d3.csvParse(reader.result, function (d) {
+    let dataTmp = d3.csvParse(reader.result, function (d) {
         // if (Object.keys(d).length = 0)
         //     delete d;
         Object.keys(d).forEach(function(value) {
@@ -19,8 +23,11 @@ function parseFile() {
         }, d);
         return d;
     });
-    calcMinMax(blazarData);
-    init();
+    let file = files[files.length - 1];
+    blazarData.push(dataTmp);
+    insertDataListRow(file.name, Object.keys(dataTmp[0]), Math.round(file.size / 1024));
+    calcMinMax(dataTmp);
+    init(dataTmp);
 }
 
 function calcMinMax(data) {

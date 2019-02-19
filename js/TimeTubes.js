@@ -4,17 +4,57 @@ var renderer;
 var controls;
 var tubeMesh;
 var grid;
+var axis;
 var clippingPlane;
 
-function init() {
+const gui = new dat.GUI();
 
+function init(data) {
     initializeScene('WebGL-TimeTubes');
     addLights();
-    makeModel(blazarData, blazarMin, blazarMax);
+    makeModel(data, blazarMin, blazarMax);
+    setGUIControls();
     animate();
 }
+
+function setGUIControls() {
+    var options = {
+        reset: function () {
+            camera.position.x = 0;
+            camera.position.y = 0;
+            camera.position.z = -50;
+        }
+    };
+    var controls = new function () {
+        this.perspective = "Perspective";
+        this.switchCamera = function () {
+            if (camera instanceof THREE.PerspectiveCamera) {
+                camera = new THREE.OrthographicCamera(window.innerWidth / -30, window.innerWidth / 30, window.innerHeight / 30, window.innerHeight / -30, 0.1, 1000);
+                camera.position.z = -50;
+                camera.lookAt(scene.position);
+                this.perspective = "Orthographic";
+            } else {
+                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = -50;
+
+                camera.lookAt(scene.position);
+                this.perspective = "Perspective";
+            }
+            addControls();
+        };
+    };
+    gui.add(options, 'reset');
+    var cam = gui.addFolder('camera');
+    cam.add(camera.position, 'x', -100, 100).listen();
+    cam.add(camera.position, 'y', -100, 100).listen();
+    cam.add(camera.position, 'z', -100, 100).listen();
+    cam.open();
+
+    gui.add(controls, 'switchCamera');
+    gui.add(controls, 'perspective').listen();
+}
+
 function makeModel (data, minList, maxList) {
-    console.log(data);
     var points = [];        // To create spline curve
     var positions = [];     // Pass position (Q/I, U/I) list to the shader
     var radiuses = [];      // Pass radius (E_Q/I, E_U/I) list to the shader
@@ -37,12 +77,9 @@ function makeModel (data, minList, maxList) {
     // Render a tube after finishing loading a texture
     var tubeTexture = new THREE.TextureLoader();
     tubeTexture.load('img/1_256.png', function (texture) {
-        let start = performance.now();
         createTube(texture);
-        let end = performance.now();
-        console.log( 'createTube: 実行時間 = ' + (end - start) + 'ミリ秒' );
-
         drawGrids(20, 10);
+        drawAxes();
     });
 
     // Add extra data values to the arrays to compute Catmull splines
@@ -94,13 +131,11 @@ function makeModel (data, minList, maxList) {
 
     // Create tube based on values of data
     function createTube(texture) {
-        let start, end;
         var tubeSpline = new THREE.CatmullRomCurve3(points);
-        var tubeNum = 32;
+        var tubeNum = 1;
 
         var tubeGeometry;
         var geometries = [];
-        start = performance.now();
         for (let i = 0; i < tubeNum; i++) {
             const geometryTmp = new THREE.TubeBufferGeometry(
                                                 tubeSpline,
@@ -110,14 +145,7 @@ function makeModel (data, minList, maxList) {
                                                 false);
             geometries.push(geometryTmp);
         }
-        end = performance.now();
-        console.log('create geometry: ' + (end - start));
-        start = performance.now();
         tubeGeometry = THREE.BufferGeometryUtils.mergeBufferGeometries(geometries);
-
-        end = performance.now();
-        console.log('merge geometry: ' + (end - start));
-        start = performance.now();
         var tubeShaderMaterial = new THREE.ShaderMaterial({
             vertexShader: document.getElementById('vertexShaderSimple').textContent,
             fragmentShader: document.getElementById('fragmentShader').textContent,
@@ -137,12 +165,7 @@ function makeModel (data, minList, maxList) {
             clipping: true,
             clippingPlanes: [clippingPlane]
         });
-        end = performance.now();
-        console.log('create material: ' + (end - start));
-        start = performance.now();
         tubeMesh = new THREE.Mesh(tubeGeometry, tubeShaderMaterial);
-        end = performance.now();
-        console.log('create mesh: ' + (end - start));
         scene.add(tubeMesh);
     }
 
@@ -152,6 +175,49 @@ function makeModel (data, minList, maxList) {
         grid.rotateX(Math.PI / 2);
         scene.add(grid);
     }
+
+    function drawAxes() {
+        // 200 * 200
+
+        let axisGeometry = new THREE.BufferGeometry();
+        let axisMaterial = new THREE.LineBasicMaterial({
+            vertexColors: THREE.VertexColors,
+            clippingPlanes: [clippingPlane]
+        });
+        let axisPosisitons = [];
+        let axisColors = (new Array(data.length * 4 * 3)).fill(1);
+        let axisIndices = [];
+        let j = 0;
+        for (let i = 0; i < data.length; i++) {
+            // left
+            axisPosisitons.push(-10);
+            axisPosisitons.push(0);
+            axisPosisitons.push(data[i]['JD'] - data[0]['JD']);
+            // right
+            axisPosisitons.push(10);
+            axisPosisitons.push(0);
+            axisPosisitons.push(data[i]['JD'] - data[0]['JD']);
+            // top
+            axisPosisitons.push(0);
+            axisPosisitons.push(10);
+            axisPosisitons.push(data[i]['JD'] - data[0]['JD']);
+            // bottom
+            axisPosisitons.push(0);
+            axisPosisitons.push(-10);
+            axisPosisitons.push(data[i]['JD'] - data[0]['JD']);
+
+            axisIndices.push(j + 0);
+            axisIndices.push(j + 1);
+            axisIndices.push(j + 2);
+            axisIndices.push(j + 3);
+            j = j + 4;
+        }
+        axisGeometry.setIndex(axisIndices);
+        axisGeometry.addAttribute('position', new THREE.Float32BufferAttribute(axisPosisitons, 3));
+        axisGeometry.addAttribute('color', new THREE.Float32BufferAttribute(axisColors, 3));
+        axis = new THREE.LineSegments( axisGeometry, axisMaterial );
+        scene.add(axis);
+    }
 }
 
 function initializeScene(id) {
@@ -159,15 +225,15 @@ function initializeScene(id) {
 
     renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(new THREE.Color(0x000000), 1.0);
-    renderer.setSize(window.innerWidth / 2, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.localClippingEnabled = true;
     document.getElementById(id).appendChild(renderer.domElement);
     document.addEventListener('wheel', onMouseWheel, false);
     // renderer.sortObjects = false;
     clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
-    camera = new THREE.PerspectiveCamera(45, (window.innerWidth / 2) / window.innerHeight, 0.1, 1000);
-    camera.aspect = (window.innerWidth / 2) / window.innerHeight;
+    camera = new THREE.PerspectiveCamera(45, (window.innerWidth) / window.innerHeight, 0.1, 1000);
+    camera.aspect = (window.innerWidth) / window.innerHeight;
     camera.position.x = 0;
     camera.position.y = 0;
     camera.position.z = -50;
@@ -186,6 +252,25 @@ function addLights() {
     scene.add(ambientLight);
 }
 
+function switchCamera() {
+    if (camera instanceof THREE.PerspectiveCamera) {
+        camera = new THREE.OrthographicCamera(-window.innerWidth, window.innerWidth, window.innerHeight, -window.innerHeight, -200, 500);
+        // camera.position.x = 120;
+        // camera.position.y = 60;
+        // camera.position.z = 180;
+        camera.lookAt(scene.position);
+        this.perspective = "Orthographic";
+    } else {
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // camera.position.x = 120;
+        // camera.position.y = 60;
+        // camera.position.z = 180;
+
+        camera.lookAt(scene.position);
+        this.perspective = "Perspective";
+    }
+}
+
 function addControls() {
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     // controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
@@ -198,15 +283,22 @@ function addControls() {
 }
 
 function onResize() {
-    camera.aspect = (window.innerWidth / 2) / window.innerHeight;
+    camera.aspect = (window.innerWidth) / window.innerHeight;
     // camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth / 2, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
     camera.updateProjectionMatrix();
 }
 
 function onMouseWheel(event) {
     // 1 scroll = 100 in deltaY
-    tubeMesh.position.z = tubeMesh.position.z - event.deltaY / 100;
+    let del = tubeMesh.position.z - event.deltaY / 100;
+    if (del > 0) {
+        tubeMesh.position.z = 0;
+        axis.position.z = 0;
+    } else {
+        tubeMesh.position.z = del;
+        axis.position.z = del;
+    }
 }
 
 function animate() {

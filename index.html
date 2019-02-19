@@ -162,7 +162,7 @@ void main()
 
 <script id="fragmentShader" type="x-shader/x-fragment">
 #define MAX_DATASIZE 500
-#define TUBE_NUM 1
+#define TUBE_NUM 32
 
 precision mediump float;
 
@@ -193,7 +193,7 @@ void main()
     T.y = (vColor.y - minmaxFlx.x) / (minmaxFlx.y - minmaxFlx.x);
     T.y = 1.0 - T.y;
     vec4 resultColor = texture2D(texture, T);
-    resultColor.a = 1.0;
+    //resultColor.a = 1.0;
     float c = max(0.0, dot(vNormal, lightDirection)) * 0.3;
     float opacity = 1.0 / float(TUBE_NUM);//vPositionx;//vWorldPosition.x;//1.0 / float(TUBE_NUM);
     gl_FragColor = vec4(resultColor.r + c, resultColor.g + c, resultColor.b + c, opacity);

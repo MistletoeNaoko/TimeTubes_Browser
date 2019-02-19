@@ -132,7 +132,7 @@ function makeModel (data, minList, maxList) {
     // Create tube based on values of data
     function createTube(texture) {
         var tubeSpline = new THREE.CatmullRomCurve3(points);
-        var tubeNum = 1;
+        var tubeNum = 32;
 
         var tubeGeometry;
         var geometries = [];

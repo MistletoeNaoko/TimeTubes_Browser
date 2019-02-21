@@ -15,17 +15,63 @@ function loadFile() {
     // }
 }
 function parseFile() {
-    let dataTmp = d3.csvParse(reader.result, function (d) {
-        // if (Object.keys(d).length = 0)
-        //     delete d;
-        Object.keys(d).forEach(function(value) {
-            d[value] = Number(d[value]);
-        }, d);
-        return d;
-    });
+    let dataTmp;
+    let formEle = document.getElementById('file_type');
+    let radioList = formEle.file_type;
+    let radioValue = radioList.value;
+    switch (radioValue) {
+        case 'csv':
+            console.log('csv file');
+            dataTmp = d3.csvParse(reader.result, function (d) {
+                // if (Object.keys(d).length = 0)
+                //     delete d;
+                Object.keys(d).forEach(function(value) {
+                    if (!isNaN(d[value]))
+                        d[value] = Number(d[value]);
+                }, d);
+                return d;
+            });
+            break;
+        case 'tsv':
+            console.log('tsv file');
+            dataTmp = d3.tsvParse(reader.result, function (d) {
+                // if (Object.keys(d).length = 0)
+                //     delete d;
+                Object.keys(d).forEach(function(value) {
+                    if (!isNaN(d[value]))
+                        d[value] = Number(d[value]);
+                }, d);
+                return d;
+            });
+            break;
+        case 'space':
+            console.log('space');
+            let lines = reader.result.split('\n');
+            let headertmp = lines[0].split(' ');
+            let header = $.grep(headertmp, function(e){return e !== "" && e !== "#";});
+            let startIdx = 0;
+            for (let i = 0; i < lines.length; i++) {
+                if (!lines[i].startsWith('#')) {
+                    startIdx = i;
+                    break;
+                }
+            }
+            let itemstmp;
+            let items = [];
+            for (let i = startIdx; i < lines.length; i++) {
+                itemstmp = lines[i].split(' ');
+                items[i] = $.grep(itemstmp, function(e){return e !== "";});
+                items[i].forEach(function (value, index, array) {
+                    if (!isNaN(value))
+                        array[index] = Number(value);
+                })
+            }
+            break;
+        default:
+            console.log('cannot open');
+    }
     let file = files[files.length - 1];
-    blazarData.push(dataTmp);
-    insertDataListRow(file.name, Object.keys(dataTmp[0]), Math.round(file.size / 1024));
+    // insertDataListRow(file.name, Object.keys(dataTmp[0]), Math.round(file.size / 1024));
     calcMinMax(dataTmp);
     init(dataTmp);
 }

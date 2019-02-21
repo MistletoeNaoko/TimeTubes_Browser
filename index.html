@@ -27,7 +27,7 @@
     <div class="panel_area">
         <div id="panel1" class="tab_panel active">
             <p>
-                <input type="file" id="fileUpload" onchange="loadFile()">
+                <input type="file" id="fileUpload" onchange="loadFile()" multiple>
                 <div id="data_list">
                     <table class="table table-hover table-bordered" id="data_list_table">
                         <thead>
@@ -162,7 +162,7 @@ void main()
 
 <script id="fragmentShader" type="x-shader/x-fragment">
 #define MAX_DATASIZE 500
-#define TUBE_NUM 32
+#define TUBE_NUM 1
 
 precision mediump float;
 

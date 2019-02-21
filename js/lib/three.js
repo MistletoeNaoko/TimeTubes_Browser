@@ -21612,9 +21612,9 @@
 	var cameraRPos = new Vector3();
 
 	/**
-	 * Assumes 2 cameras that are parallel and share an X-axis, and that
-	 * the cameras' projection and world matrices have already been set.
-	 * And that near and far planes are identical for both cameras.
+	 * Assumes 2 camera_set that are parallel and share an X-axis, and that
+	 * the camera_set' projection and world matrices have already been set.
+	 * And that near and far planes are identical for both camera_set.
 	 * Visualization of this technique: https://computergraphics.stackexchange.com/a/4765
 	 */
 	function setProjectionFromUnion( camera, cameraL, cameraR ) {
@@ -21652,7 +21652,7 @@
 		camera.matrixWorld.compose( camera.position, camera.quaternion, camera.scale );
 		camera.matrixWorldInverse.getInverse( camera.matrixWorld );
 
-		// Find the union of the frustum values of the cameras and scale
+		// Find the union of the frustum values of the camera_set and scale
 		// the values so that the near clippingPlane's position does not change in world space,
 		// although must now be relative to the new union camera.
 		var near2 = near + zOffset;

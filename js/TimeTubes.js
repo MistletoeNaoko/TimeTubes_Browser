@@ -1,4 +1,6 @@
 var camera;
+var camera_set = [];
+var camera_para = {};
 var scene;
 var renderer;
 var controls;
@@ -9,8 +11,9 @@ var clippingPlane;
 
 const gui = new dat.GUI();
 
+
 function init(data) {
-    initializeScene('WebGL-TimeTubes');
+    initializeScene('WebGL-TimeTubes', data);
     addLights();
     makeModel(data, blazarMin, blazarMax);
     setGUIControls();
@@ -18,6 +21,7 @@ function init(data) {
 }
 
 function setGUIControls() {
+    var cam, camx, camy, camz, camfar;
     var options = {
         reset: function () {
             camera.position.x = 0;
@@ -25,33 +29,49 @@ function setGUIControls() {
             camera.position.z = -50;
         }
     };
-    var controls = new function () {
+    var switchCamera = new function () {
         this.perspective = "Perspective";
         this.switchCamera = function () {
             if (camera instanceof THREE.PerspectiveCamera) {
-                camera = new THREE.OrthographicCamera(window.innerWidth / -30, window.innerWidth / 30, window.innerHeight / 30, window.innerHeight / -30, 0.1, 1000);
+                camera = camera_set[1];//new THREE.OrthographicCamera(window.innerWidth / -30, window.innerWidth / 30, window.innerHeight / 30, window.innerHeight / -30, 0.1, camera_para['far']);
                 camera.position.z = -50;
                 camera.lookAt(scene.position);
                 this.perspective = "Orthographic";
             } else {
-                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera = camera_set[0];//new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, camera_para['far']);
                 camera.position.z = -50;
 
                 camera.lookAt(scene.position);
                 this.perspective = "Perspective";
             }
             addControls();
+            // いったんフォルダを除いて新しいカメラで再追加する？
+            removeCameraControl();
+            addCameraControl();
         };
     };
-    gui.add(options, 'reset');
-    var cam = gui.addFolder('camera');
-    cam.add(camera.position, 'x', -100, 100).listen();
-    cam.add(camera.position, 'y', -100, 100).listen();
-    cam.add(camera.position, 'z', -100, 100).listen();
-    cam.open();
 
-    gui.add(controls, 'switchCamera');
-    gui.add(controls, 'perspective').listen();
+    gui.add(options, 'reset');
+    cam = gui.addFolder('camera');
+    addCameraControl();
+    cam.open();
+    gui.add(switchCamera, 'switchCamera');
+    gui.add(switchCamera, 'perspective').listen();
+
+    function addCameraControl() {
+        camx = cam.add(camera.position, 'x', -100, 100).listen();
+        camy = cam.add(camera.position, 'y', -100, 100).listen();
+        camz = cam.add(camera.position, 'z', -100, 100).listen();
+        camfar = cam.add(camera, 'far', 100, camera_para['far']).onChange(function () {
+            camera.updateProjectionMatrix();
+        });
+    }
+    function removeCameraControl() {
+        cam.remove(camx);
+        cam.remove(camy);
+        cam.remove(camz);
+        cam.remove(camfar);
+    }
 }
 
 function makeModel (data, minList, maxList) {
@@ -77,7 +97,10 @@ function makeModel (data, minList, maxList) {
     // Render a tube after finishing loading a texture
     var tubeTexture = new THREE.TextureLoader();
     tubeTexture.load('img/1_256.png', function (texture) {
+        // let start = performance.now();
         createTube(texture);
+        // let end = performance.now();
+        // console.log(end - start);
         drawGrids(20, 10);
         drawAxes();
     });
@@ -132,7 +155,7 @@ function makeModel (data, minList, maxList) {
     // Create tube based on values of data
     function createTube(texture) {
         var tubeSpline = new THREE.CatmullRomCurve3(points);
-        var tubeNum = 32;
+        var tubeNum = 1;
 
         var tubeGeometry;
         var geometries = [];
@@ -220,7 +243,7 @@ function makeModel (data, minList, maxList) {
     }
 }
 
-function initializeScene(id) {
+function initializeScene(id, data) {
     scene = new THREE.Scene();
 
     renderer = new THREE.WebGLRenderer();
@@ -232,7 +255,17 @@ function initializeScene(id) {
     // renderer.sortObjects = false;
     clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
-    camera = new THREE.PerspectiveCamera(45, (window.innerWidth) / window.innerHeight, 0.1, 1000);
+    camera_para['fov'] = 45;
+    camera_para['far'] = Math.ceil(data[data.length - 1]['JD'] - data[0]['JD']);
+    camera_para['depth'] = Math.tan(camera_para['fov'] / 2.0 * Math.PI / 180.0) * 2;
+    camera_para['aspect'] = window.innerWidth / window.innerHeight;
+    let size_y = camera_para['depth'] * (50);
+    let size_x = camera_para['depth'] * (50) * camera_para['aspect'];
+    camera_set[0] = new THREE.PerspectiveCamera(45, (window.innerWidth) / window.innerHeight, 0.1, camera_para['far']);
+    camera_set[1] = new THREE.OrthographicCamera(
+        -size_x / 2, size_x / 2,
+        size_y / 2, -size_y / 2, 0.1, camera_para['far']);
+    camera = camera_set[0];
     camera.aspect = (window.innerWidth) / window.innerHeight;
     camera.position.x = 0;
     camera.position.y = 0;
@@ -250,25 +283,6 @@ function addLights() {
 
     var ambientLight = new THREE.AmbientLight(0x292929);
     scene.add(ambientLight);
-}
-
-function switchCamera() {
-    if (camera instanceof THREE.PerspectiveCamera) {
-        camera = new THREE.OrthographicCamera(-window.innerWidth, window.innerWidth, window.innerHeight, -window.innerHeight, -200, 500);
-        // camera.position.x = 120;
-        // camera.position.y = 60;
-        // camera.position.z = 180;
-        camera.lookAt(scene.position);
-        this.perspective = "Orthographic";
-    } else {
-        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        // camera.position.x = 120;
-        // camera.position.y = 60;
-        // camera.position.z = 180;
-
-        camera.lookAt(scene.position);
-        this.perspective = "Perspective";
-    }
 }
 
 function addControls() {

@@ -10235,7 +10235,7 @@ THREE.EventDispatcher.prototype.apply( THREE.Geometry.prototype );
 
 THREE.GeometryIdCount = 0;
 
-// File:src/cameras/Camera.js
+// File:src/camera_set/Camera.js
 
 /**
  * @author mrdoob / http://mrdoob.com/
@@ -10274,7 +10274,7 @@ THREE.Camera.prototype.getWorldDirection = function () {
 
 THREE.Camera.prototype.lookAt = function () {
 
-	// This routine does not support cameras with rotated and/or translated parent(s)
+	// This routine does not support camera_set with rotated and/or translated parent(s)
 
 	var m1 = new THREE.Matrix4();
 
@@ -10300,7 +10300,7 @@ THREE.Camera.prototype.clone = function ( camera ) {
 	return camera;
 };
 
-// File:src/cameras/CubeCamera.js
+// File:src/camera_set/CubeCamera.js
 
 /**
  * Camera for rendering cube maps
@@ -10382,7 +10382,7 @@ THREE.CubeCamera = function ( near, far, cubeResolution ) {
 
 THREE.CubeCamera.prototype = Object.create( THREE.Object3D.prototype );
 
-// File:src/cameras/OrthographicCamera.js
+// File:src/camera_set/OrthographicCamera.js
 
 /**
  * @author alteredq / http://alteredqualia.com/
@@ -10442,7 +10442,7 @@ THREE.OrthographicCamera.prototype.clone = function () {
 	return camera;
 };
 
-// File:src/cameras/PerspectiveCamera.js
+// File:src/camera_set/PerspectiveCamera.js
 
 /**
  * @author mrdoob / http://mrdoob.com/

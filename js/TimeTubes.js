@@ -1,15 +1,18 @@
-var camera;
-var camera_set = [];
-var camera_para = {};
-var scene;
-var renderer;
-var controls;
-var tubeMesh;
-var grid;
-var axis;
-var clippingPlane;
+let camera;
+let camera_set = [];
+let camera_para = {};
+let scene;
+let renderer;
+let controls;
+let tube;
+let grid;
+let axis;
+let plot;
+let clippingPlane;
+const segment = 16;
 
 const gui = new dat.GUI();
+let GUIoptions;
 
 
 function init(data) {
@@ -21,65 +24,108 @@ function init(data) {
 }
 
 function setGUIControls() {
-    var cam, camx, camy, camz, camfar;
-    var options = {
+    let cam, camPos,
+        camx, camy, camz, camfar,
+        display;//, background;
+
+    GUIoptions = {
         reset: function () {
             camera.position.x = 0;
             camera.position.y = 0;
             camera.position.z = -50;
-        }
+        },
+        grid: true,
+        axis: true,
+        plot: true,
+        plotColor: [127, 255, 212],
+        clip: true,
+        background: [0, 0, 0]
     };
-    var switchCamera = new function () {
+
+    let switchCamera = new function () {
         this.perspective = "Perspective";
         this.switchCamera = function () {
             if (camera instanceof THREE.PerspectiveCamera) {
-                camera = camera_set[1];//new THREE.OrthographicCamera(window.innerWidth / -30, window.innerWidth / 30, window.innerHeight / 30, window.innerHeight / -30, 0.1, camera_para['far']);
+                camera = camera_set[1];
                 camera.position.z = -50;
                 camera.lookAt(scene.position);
                 this.perspective = "Orthographic";
             } else {
-                camera = camera_set[0];//new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, camera_para['far']);
+                camera = camera_set[0];
                 camera.position.z = -50;
 
                 camera.lookAt(scene.position);
                 this.perspective = "Perspective";
             }
             addControls();
-            // いったんフォルダを除いて新しいカメラで再追加する？
             removeCameraControl();
             addCameraControl();
         };
     };
 
-    gui.add(options, 'reset');
-    cam = gui.addFolder('camera');
+    cam = gui.addFolder('Camera');
+    cam.add(GUIoptions, 'reset');
+    cam.add(switchCamera, 'switchCamera');
+    cam.add(switchCamera, 'perspective').listen();
+    camPos = cam.addFolder('Position');
     addCameraControl();
     cam.open();
-    gui.add(switchCamera, 'switchCamera');
-    gui.add(switchCamera, 'perspective').listen();
 
+    display = gui.addFolder('Display');
+    display.add(GUIoptions, 'grid').onChange(function (e) {
+        grid.visible = e;
+    });
+    display.add(GUIoptions, 'axis').onChange(function (e) {
+        axis.visible = e;
+    });
+
+    plotGUIs = display.addFolder('Plot');
+    plotGUIs.add(GUIoptions, 'plot').onChange(function (e) {
+        plot.visible = e;
+    });
+    plotGUIs.addColor(GUIoptions, 'plotColor').onChange(function (e) {
+        plot.material.color.setRGB(e[0] / 255, e[1] / 255, e[2] / 255);
+    });
+    plotGUIs.open();
+    display.add(GUIoptions, 'clip').onChange(function (e) {
+        renderer.localClippingEnabled = e;
+    });
+    // background = display.addFolder('Background');
+    display.add(GUIoptions, 'background',
+        {Black: [0, 0, 0],
+         Gray_75: [63, 63, 63],
+         Gray_50: [127, 127, 127],
+         Gray_25: [191, 191, 191],
+         White: [255, 255, 255],
+         Navy: [25, 25, 112]}).onChange(function (e) {
+        let col = e.split(',').map(Number);
+        scene.background = new THREE.Color(col[0] / 255, col[1] / 255, col[2] / 255);
+    });
+    // background.addColor(GUIoptions, 'background_color').onChange(function (e) {
+    //     scene.background.setRGB(e[0] / 255, e[1] / 255, e[2] / 255);
+    // });
     function addCameraControl() {
-        camx = cam.add(camera.position, 'x', -100, 100).listen();
-        camy = cam.add(camera.position, 'y', -100, 100).listen();
-        camz = cam.add(camera.position, 'z', -100, 100).listen();
+        camx = camPos.add(camera.position, 'x', -100, 100).listen();
+        camy = camPos.add(camera.position, 'y', -100, 100).listen();
+        camz = camPos.add(camera.position, 'z', -100, 100).listen();
         camfar = cam.add(camera, 'far', 100, camera_para['far']).onChange(function () {
             camera.updateProjectionMatrix();
         });
     }
     function removeCameraControl() {
-        cam.remove(camx);
-        cam.remove(camy);
-        cam.remove(camz);
+        camPos.remove(camx);
+        camPos.remove(camy);
+        camPos.remove(camz);
         cam.remove(camfar);
     }
 }
 
 function makeModel (data, minList, maxList) {
-    var points = [];        // To create spline curve
-    var positions = [];     // Pass position (Q/I, U/I) list to the shader
-    var radiuses = [];      // Pass radius (E_Q/I, E_U/I) list to the shader
-    var colors = [];        // Pass color (V-J, Flx(V)) list to the shader
-    for (var i = 0; i < data.length; ++i) {
+    let points = [];        // To create spline curve
+    let positions = [];     // Pass position (Q/I, U/I) list to the shader
+    let radiuses = [];      // Pass radius (E_Q/I, E_U/I) list to the shader
+    let colors = [];        // Pass color (V-J, Flx(V)) list to the shader
+    for (let i = 0; i < data.length; ++i) {
         points.push(new THREE.Vector3(0, 0, data[i]['JD'] - data[0]['JD']));
 
         positions.push(data[i]['Q/I']*100);
@@ -92,10 +138,10 @@ function makeModel (data, minList, maxList) {
         colors.push(data[i]['V-J']);
         colors.push(data[i]['Flx(V)']);
     }
-    makeEdgeExtra(1);
+    makeEdgeExtra(2);
 
     // Render a tube after finishing loading a texture
-    var tubeTexture = new THREE.TextureLoader();
+    let tubeTexture = new THREE.TextureLoader();
     tubeTexture.load('img/1_256.png', function (texture) {
         // let start = performance.now();
         createTube(texture);
@@ -103,6 +149,7 @@ function makeModel (data, minList, maxList) {
         // console.log(end - start);
         drawGrids(20, 10);
         drawAxes();
+        drawCircle();
     });
 
     // Add extra data values to the arrays to compute Catmull splines
@@ -111,12 +158,12 @@ function makeModel (data, minList, maxList) {
         let a1 = data[1];
 
         let diff = {};
-        for (var key in a0) {
+        for (let key in a0) {
             diff[key] = a0[key] - a1[key];
         }
         let tmp = {};
-        for (var i = 1; i <= range; i++) {
-            for (var key in data[0]) {
+        for (let i = 1; i <= range; i++) {
+            for (let key in data[0]) {
                 tmp[key] = a0[key] + i * diff[key];
             }
             positions.unshift(tmp['JD'] - data[0]['JD']);
@@ -133,11 +180,11 @@ function makeModel (data, minList, maxList) {
         a0 = data[data.length - 2];
         a1 = data[data.length - 1];
 
-        for (var key in a0) {
+        for (let key in a0) {
             diff[key] = a1[key] - a0[key];
         }
-        for (var i = 1; i <= range; i++) {
-            for (var key in data[0]) {
+        for (let i = 1; i <= range; i++) {
+            for (let key in data[0]) {
                 tmp[key] = a1[key] + i * diff[key];
             }
             positions.push(tmp['Q/I'] * 100);
@@ -154,22 +201,22 @@ function makeModel (data, minList, maxList) {
 
     // Create tube based on values of data
     function createTube(texture) {
-        var tubeSpline = new THREE.CatmullRomCurve3(points);
-        var tubeNum = 1;
+        let tubeSpline = new THREE.CatmullRomCurve3(points);
+        let tubeNum = 1;
 
-        var tubeGeometry;
-        var geometries = [];
+        let tubeGeometry;
+        let geometries = [];
         for (let i = 0; i < tubeNum; i++) {
             const geometryTmp = new THREE.TubeBufferGeometry(
                                                 tubeSpline,
-                                                5 * Math.ceil(data[data.length - 1]['JD'] - data[0]['JD']),
+                                                10 * Math.ceil(data[data.length - 1]['JD'] - data[0]['JD']),
                                                 (1 / tubeNum) * (i + 1),
-                                                32,
+                                                segment,
                                                 false);
             geometries.push(geometryTmp);
         }
         tubeGeometry = THREE.BufferGeometryUtils.mergeBufferGeometries(geometries);
-        var tubeShaderMaterial = new THREE.ShaderMaterial({
+        let tubeShaderMaterial = new THREE.ShaderMaterial({
             vertexShader: document.getElementById('vertexShaderSimple').textContent,
             fragmentShader: document.getElementById('fragmentShader').textContent,
             uniforms: {
@@ -188,8 +235,8 @@ function makeModel (data, minList, maxList) {
             clipping: true,
             clippingPlanes: [clippingPlane]
         });
-        tubeMesh = new THREE.Mesh(tubeGeometry, tubeShaderMaterial);
-        scene.add(tubeMesh);
+        tube = new THREE.Mesh(tubeGeometry, tubeShaderMaterial);
+        scene.add(tube);
     }
 
     function drawGrids(size, divisions) {
@@ -204,11 +251,11 @@ function makeModel (data, minList, maxList) {
 
         let axisGeometry = new THREE.BufferGeometry();
         let axisMaterial = new THREE.LineBasicMaterial({
-            vertexColors: THREE.VertexColors,
+            color: 'white',
+            opacity: 0.5,
             clippingPlanes: [clippingPlane]
         });
         let axisPosisitons = [];
-        let axisColors = (new Array(data.length * 4 * 3)).fill(1);
         let axisIndices = [];
         let j = 0;
         for (let i = 0; i < data.length; i++) {
@@ -237,9 +284,42 @@ function makeModel (data, minList, maxList) {
         }
         axisGeometry.setIndex(axisIndices);
         axisGeometry.addAttribute('position', new THREE.Float32BufferAttribute(axisPosisitons, 3));
-        axisGeometry.addAttribute('color', new THREE.Float32BufferAttribute(axisColors, 3));
         axis = new THREE.LineSegments( axisGeometry, axisMaterial );
         scene.add(axis);
+    }
+    function drawCircle() {
+        let circlePositions = [];
+        let circleIndices = Array(data.length * segment * 2);
+        let del = Math.PI * 2 / segment;
+        for (let i = 0; i < data.length; i++) {
+            let zpos = data[i]['JD'] - data[0]['JD'];
+            let xcent = -data[i]['Q/I']*100;
+            let ycent = data[i]['U/I']*100;
+            let xrad = data[i]['E_Q/I']*100;
+            let yrad = data[i]['E_U/I']*100;
+            // 0-1, 1-2, 2-3, ... , 31-0
+            let currentIdx = segment * 2 * i;
+            circleIndices[currentIdx] = i * segment;
+            circleIndices[currentIdx + segment * 2 - 1] = i * segment;
+            for (let j = 0; j < segment; j++) {
+                circlePositions.push(xcent + xrad * Math.cos(del * j));
+                circlePositions.push(ycent + yrad * Math.sin(del * j));
+                circlePositions.push(zpos);
+                if (j !== 0) {
+                    circleIndices[currentIdx + 2 * (j - 1) + 1] = i * segment + j;
+                    circleIndices[currentIdx + 2 * (j - 1) + 2] = i * segment + j;
+                }
+            }
+        }
+        let circleGeometry = new THREE.BufferGeometry();
+        circleGeometry.setIndex(circleIndices);
+        circleGeometry.addAttribute('position', new THREE.Float32BufferAttribute(circlePositions, 3));
+        let circleMaterial = new THREE.LineBasicMaterial({
+            color: new THREE.Color('rgb(127, 255, 212)'),
+            clippingPlanes: [clippingPlane]
+        });
+        plot = new THREE.LineSegments(circleGeometry, circleMaterial);
+        scene.add(plot);
     }
 }
 
@@ -256,7 +336,8 @@ function initializeScene(id, data) {
     clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
     camera_para['fov'] = 45;
-    camera_para['far'] = Math.ceil(data[data.length - 1]['JD'] - data[0]['JD']);
+    let period = data[data.length - 1]['JD'] - data[0]['JD'];
+    camera_para['far'] = Math.ceil(period) + 50;
     camera_para['depth'] = Math.tan(camera_para['fov'] / 2.0 * Math.PI / 180.0) * 2;
     camera_para['aspect'] = window.innerWidth / window.innerHeight;
     let size_y = camera_para['depth'] * (50);
@@ -277,11 +358,11 @@ function initializeScene(id, data) {
 
 // Add lights to the scene
 function addLights() {
-    var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+    let directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
     directionalLight.position.set(-20, 40, 60);
     scene.add(directionalLight);
 
-    var ambientLight = new THREE.AmbientLight(0x292929);
+    let ambientLight = new THREE.AmbientLight(0x292929);
     scene.add(ambientLight);
 }
 
@@ -305,13 +386,15 @@ function onResize() {
 
 function onMouseWheel(event) {
     // 1 scroll = 100 in deltaY
-    let del = tubeMesh.position.z - event.deltaY / 100;
+    let del = tube.position.z - event.deltaY / 100;
     if (del > 0) {
-        tubeMesh.position.z = 0;
+        tube.position.z = 0;
         axis.position.z = 0;
+        plot.position.z = 0;
     } else {
-        tubeMesh.position.z = del;
+        tube.position.z = del;
         axis.position.z = del;
+        plot.position.z = del;
     }
 }
 

@@ -105,9 +105,19 @@ void main()
     vDisFlag = 1.0;
     if (Ti >= size - 1)
         vDisFlag = 0.0;
-    vec3 currentPos = InterpPos(Ti, Td);
-    vec2 currentRad = InterpRad(Ti, Td);
-    vColor = InterpColor(Ti, Td);
+    vec3 currentPos;
+    vec2 currentRad;
+    if (abs(Td) < 0.001) {
+        currentPos = points[Ti];
+        currentRad = radiuses[Ti];
+        vColor = colors[Ti];
+    } else {
+        currentPos = InterpPos(Ti, Td);
+        currentRad = InterpRad(Ti, Td);
+        vColor = InterpColor(Ti, Td);
+    }
+    if (currentPos.z < 0.0)
+        vDisFlag = 0.0;
 
     // Transform the straight tube based on the data
     vec3 P;

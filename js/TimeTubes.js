@@ -83,7 +83,7 @@ function setGUIControls() {
     plotGUIs.add(GUIoptions, 'plot').onChange(function (e) {
         plot.visible = e;
     });
-    plotGUIs.addColor(GUIoptions, 'plotColor').onChange(function (e) {
+    let color = plotGUIs.addColor(GUIoptions, 'plotColor').onChange(function (e) {
         plot.material.color.setRGB(e[0] / 255, e[1] / 255, e[2] / 255);
     });
     plotGUIs.open();

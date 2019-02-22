@@ -31,6 +31,10 @@ td {
     background-color: ghostwhite;
 }
 
+.color .c input {
+    height: 18px;
+}
+
 .starter-template {
     padding: 3rem 1.5rem;
     /*text-align: center;*/

@@ -1,7 +1,8 @@
-body {
+/*body {*/
+    /*margin: 10px;*/
     /*padding-top: 1rem;*/
-    background-color: aliceblue;
-}
+    /*background-color: aliceblue;*/
+/*}*/
 
 table {
     border-collapse: collapse;
@@ -15,13 +16,56 @@ th {
     border-bottom: 1px solid #ddd;
     background-color: slategray;
 }
+
 td {
      padding: 8px;
      text-align: left;
      border-bottom: 1px solid #ddd;
  }
 
+.table_values td {
+    padding: 2px 5px;
+
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.label_values {
+    width: 70px;
+}
+
+.current_values {
+    width: 110px;
+    text-align: right;
+}
+
 /*tr:hover {background-color:#f5f5f5;}*/
+.menu {
+    color: white;
+    position: absolute;
+    padding: 15px 10px;
+}
+
+#file_input {
+    color: white;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 15px 10px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
+}
+
+#panel_values {
+    background: rgba(0, 0, 0, 0.75);
+    left: 0px;
+    width: 200px;
+    z-index: 3;
+}
+
+#WebGL-TimeTubes {
+    z-index: 1;
+}
 
 .scrollbox {
     /*width: 85%;*/

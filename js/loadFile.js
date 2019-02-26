@@ -1,12 +1,17 @@
-var blazarData = [];
-var blazarMin = {};
-var blazarMax = {};
+let blazarData = [];
+let blazarNum = [];
+let blazarMin = [];
+let blazarMax = [];
+let blazarAve = [];
+let blazarStd = [];
+let blazarRange = [];
+let dataSplines = [];
 
-var files = [];
+let files = [];
 
-var reader = new FileReader();
+let reader = new FileReader();
 function loadFile() {
-    var file = document.querySelector('input[type=file]').files[0];
+    let file = document.querySelector('input[type=file]').files[0];
     files.push(file);
     reader.readAsText(file);
     reader.addEventListener("load", parseFile, false);
@@ -71,26 +76,82 @@ function parseFile() {
             console.log('cannot open');
     }
     let file = files[files.length - 1];
+    blazarData.push(dataTmp);
+    let dataIdx = blazarData.length - 1;
     // insertDataListRow(file.name, Object.keys(dataTmp[0]), Math.round(file.size / 1024));
-    calcMinMax(dataTmp);
-    init(dataTmp);
+    calcMinMax(dataIdx);
+    calcStd(dataIdx);
+    calcMagRate(dataIdx);
+    calcSplines(dataIdx);
+    init(dataIdx);
 }
 
-function calcMinMax(data) {
-    let data0 = data[0];
+function calcMinMax(idx) {
+    blazarMin[idx] = {};
+    blazarMax[idx] = {};
+    blazarAve[idx] = {};
+    blazarNum[idx] = {};
+    blazarStd[idx] = {};
+    let data0 = blazarData[idx][0];
     for (let key in data0) {
-        blazarMin[key] = data0[key];
-        blazarMax[key] = data0[key];
+        blazarMin[idx][key] = data0[key];
+        blazarMax[idx][key] = data0[key];
+        blazarAve[idx][key] = data0[key];
+        blazarNum[idx][key] = 1;
     }
-
-    for (var i = 1; i < data.length; i++) {
-        for (let key in data[i]) {
-            if (data[i][key] < blazarMin[key]) {
-                blazarMin[key] = data[i][key];
+    for (let i = 1; i < blazarData[idx].length; i++) {
+        for (let key in blazarData[idx][i]) {
+            blazarNum[idx][key]++;
+            blazarAve[idx][key] += blazarData[idx][i][key];
+            if (blazarData[idx][i][key] < blazarMin[idx][key]) {
+                blazarMin[idx][key] = blazarData[idx][i][key];
             }
-            if (blazarMax[key] < data[i][key]) {
-                blazarMax[key] = data[i][key];
+            if (blazarMax[idx][key] < blazarData[idx][i][key]) {
+                blazarMax[idx][key] = blazarData[idx][i][key];
             }
         }
     }
+    for (let key in blazarAve[idx]) {
+        blazarAve[idx][key] = blazarAve[idx][key] / blazarNum[idx][key];
+    }
+}
+
+function calcStd(idx) {
+    for (let i = 0; i < blazarData[idx].length; i++) {
+        for (let key in blazarData[idx][i]) {
+            if (isNaN(blazarStd[idx][key])) {
+                blazarStd[idx][key] = 0;
+            }
+            blazarStd[idx][key] += Math.pow(blazarData[idx][i][key] - blazarAve[idx][key], 2);
+        }
+    }
+    for (let key in blazarStd[idx]) {
+        blazarStd[idx][key] = Math.sqrt(blazarStd[idx][key] / blazarNum[idx][key]);
+    }
+}
+
+function calcMagRate(idx) {
+    // min: ave - 2 * std, max: ave + 2 * std
+    let QIrange = Math.max(Math.abs(blazarAve[idx]['Q/I'] - 3 * blazarStd[idx]['Q/I']), blazarAve[idx]['Q/I'] + 2 * blazarStd[idx]['Q/I']);
+    let UIrange = Math.max(Math.abs(blazarAve[idx]['U/I'] - 3 * blazarStd[idx]['U/I']), blazarAve[idx]['Q/I'] + 2 * blazarStd[idx]['Q/I']);
+    let datarange = Math.max(QIrange, UIrange);
+    let int2dig = Math.round(datarange * Math.pow(10, 2 - Math.ceil(Math.log10(datarange))));
+    // compute proper range of grid which is multiples of 5
+    let range = Math.ceil(int2dig / 5) * 5 * Math.pow(10, - (2 - Math.ceil(Math.log10(datarange))));
+    blazarRange[idx] = 10 / range;
+}
+
+function calcSplines(idx) {
+    let pos = [];
+    let err = [];
+    let col = [];
+    for (let i = 0; i < blazarData[idx].length; i++) {
+        pos.push(new THREE.Vector3(blazarData[idx][i]['Q/I'], blazarData[idx][i]['U/I'], blazarData[idx][i]['JD']));
+        err.push(new THREE.Vector3(blazarData[idx][i]['E_Q/I'], blazarData[idx][i]['E_U/I'], blazarData[idx][i]['JD']));
+        col.push(new THREE.Vector3(blazarData[idx][i]['V-J'], blazarData[idx][i]['Flx(V)'], blazarData[idx][i]['JD']));
+    }
+    dataSplines[idx] = {};
+    dataSplines[idx]['position'] = new THREE.CatmullRomCurve3(pos);
+    dataSplines[idx]['error'] = new THREE.CatmullRomCurve3(err);
+    dataSplines[idx]['color'] = new THREE.CatmullRomCurve3(col);
 }

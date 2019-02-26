@@ -9,6 +9,7 @@
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/lib/bootstrap-slider.js"></script>
     <script type="text/javascript" src="js/lib/three.min.js"></script>
     <script type="text/javascript" src="js/lib/d3.min.js"></script>
     <script type="text/javascript" src="js/lib/OrbitControls.js"></script>
@@ -16,6 +17,34 @@
     <script type="text/javascript" src="js/lib/dat.gui.min.js"></script>
 </head>
 <body onresize="onResize()">
+<div id="panel_values" class="menu">
+    <div id="file_names"></div>
+    <div id="values">
+        <table class="table_values">
+            <tr>
+                <td><i>JD</i></td>
+                <td id="JD_value"></td>
+            </tr>
+            <tr>
+                <td><i>Q/I</i></td>
+                <td id="QI_value"></td>
+            </tr>
+            <tr>
+                <td><i>E_Q/I</i></td>
+                <td id="EQI_value"></td>
+            </tr>
+            <tr>
+                <td><i>U/I</i></td>
+                <td id="UI_value"></td>
+            </tr>
+            <tr>
+                <td><i>E_U/I</i></td>
+                <td id="EUI_value"></td>
+            </tr>
+        </table>
+    </div>
+    <!--<input id="ex2" type="text" class="span2" value="" data-slider-min="10" data-slider-max="1000" data-slider-step="5" data-slider-value="[250,450]"/>-->
+</div>
 <div id="WebGL-TimeTubes">
     Please select a file type:
     <form id="file_type">
@@ -103,7 +132,7 @@ void main()
     int   Ti = int(Tx);
     float Td = position.z - Tx;
     vDisFlag = 1.0;
-    if (Ti >= size - 1)
+    if (Ti >= size)
         vDisFlag = 0.0;
     vec3 currentPos;
     vec2 currentRad;
@@ -162,7 +191,7 @@ void main()
     vec2 T;
     T.x = (vColor.x - minmaxVJ.x) / (minmaxVJ.y - minmaxVJ.x);
     T.y = (vColor.y - minmaxFlx.x) / (minmaxFlx.y - minmaxFlx.x);
-    T.y = 1.0 - T.y;
+    //T.y = 1.0 - T.y;
     vec4 resultColor = texture2D(texture, T);
     //resultColor.a = 1.0;
     float c = max(0.0, dot(vNormal, lightDirection)) * 0.3;

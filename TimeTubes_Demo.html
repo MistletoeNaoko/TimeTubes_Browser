@@ -11,6 +11,8 @@
     <script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/lib/bootstrap-slider.js"></script>
     <script type="text/javascript" src="js/lib/three.min.js"></script>
+    <script src="https://unpkg.com/three.texttexture"></script>
+    <script src="https://unpkg.com/three.textsprite"></script>
     <script type="text/javascript" src="js/lib/d3.min.js"></script>
     <script type="text/javascript" src="js/lib/OrbitControls.js"></script>
     <script type="text/javascript" src="js/lib/BufferGeometryUtils.js"></script>
@@ -55,13 +57,25 @@
 </div>
 <div id="WebGL-TimeTubes"></div>
 <div id="file_input">
-    Please select a file type:
+    Select a file type:
     <form id="file_type">
-        <input type="radio" name="file_type" value="csv" checked>csv
-        <input type="radio" name="file_type" value="tsv">tsv
-        <input type="radio" name="file_type" value="space">space
+        <div class="form-check form-check-inline">
+            <input type="radio" name="file_type" value="csv" checked>
+            <label class="form-check-label" for="inlineCheckbox1">csv</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input type="radio" name="file_type" value="tsv">
+            <label class="form-check-label" for="inlineCheckbox1">tsv</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input type="radio" name="file_type" value="space">
+            <label class="form-check-label" for="inlineCheckbox1">space</label>
+        </div>
     </form>
-    <input type="file" id="fileUpload" onchange="loadFile()">
+    <div class="custom-file">
+    <input class="custom-file-input" type="file" id="fileUpload" onchange="loadFile()">
+    <label class="custom-file-label" for="customFile">Choose file</label>
+    </div>
 </div>
 <script type="text/javascript" src="js/updateDataListTable.js"></script>
 <script type="text/javascript" src="js/switchTab.js"></script>

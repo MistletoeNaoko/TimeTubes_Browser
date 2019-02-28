@@ -9,6 +9,7 @@ let renderer;
 let controls;
 let tube;
 let grid;
+let labels = [];
 let axis;
 let plot;
 let clippingPlane;
@@ -34,7 +35,7 @@ function initializeScene(id, data) {
     document.getElementById(id).appendChild(renderer.domElement);
     document.addEventListener('wheel', onMouseWheel, false);
     // renderer.sortObjects = false;
-    clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
 
     camera_para['fov'] = 45;
     camera_para['far'] = Math.ceil(data[data.length - 1]['JD'] - data[0]['JD']) + 50;
@@ -50,11 +51,10 @@ function initializeScene(id, data) {
     camera.aspect = ($(window).width()) / $(window).height();
     camera.position.x = 0;
     camera.position.y = 0;
-    camera.position.z = -50;
-    camera.lookAt(scene.position);
+    camera.position.z = 50;
+    camera.lookAt(-scene.position);
 
     addLights();
-
     addControls();
 
     // Add lights to the scene
@@ -93,6 +93,7 @@ function makeModel (data, range, minList, maxList) {
     tubeTexture.load('img/1_256.png', function (texture) {
         createTube(texture);
         drawGrids(20, 10);
+        drawLabels(10 / range);
         drawAxes();
         drawCircle();
     });
@@ -182,6 +183,7 @@ function makeModel (data, range, minList, maxList) {
         });
         tube = new THREE.Mesh(tubeGeometry, tubeShaderMaterial);
         scene.add(tube);
+        tube.rotateY(Math.PI);
     }
 
     function drawGrids(size, divisions) {
@@ -189,6 +191,61 @@ function makeModel (data, range, minList, maxList) {
         grid = new THREE.GridHelper(size, divisions, 'white', 'limegreen');
         grid.rotateX(Math.PI / 2);
         scene.add(grid);
+    }
+
+    function drawLabels(valrange) {
+        let pm = [
+            [1, 1],
+            [-1, 1],
+            [-1, -1],
+            [1, -1]
+        ];
+        for (let i = 0; i < pm.length; i++) {
+            let label = new THREE.TextSprite({
+                material: {
+                    color: 0xffffff,
+                },
+                redrawInterval: 250,
+                textSize: 0.8,
+                texture: {
+                    fontFamily: 'Arial, Helvetica, sans-serif',
+                    text: '(' + pm[i][0] * valrange + ', ' + pm[i][1] * valrange + ')',
+                },
+            });
+            labels.push(label);
+            scene.add(label);
+            label.position.set( pm[i][0] * 10,  pm[i][1] * 10, 0);
+        }
+        let QIlabel = new THREE.TextSprite({
+            material: {
+                color: 0x006400,
+            },
+            redrawInterval: 250,
+            textSize: 1,
+            texture: {
+                fontFamily: 'Arial, Helvetica, sans-serif',
+                fontStyle: 'italic',
+                text: 'Q/I',
+            },
+        });
+        let UIlabel = new THREE.TextSprite({
+            material: {
+                color: 0x006400,
+            },
+            redrawInterval: 250,
+            textSize: 1,
+            texture: {
+                fontFamily: 'Arial, Helvetica, sans-serif',
+                fontStyle: 'italic',
+                text: 'U/I',
+            },
+        });
+        labels.push(QIlabel);
+        labels.push(UIlabel);
+        scene.add(QIlabel);
+        scene.add(UIlabel);
+        QIlabel.position.set(11, 0, 0);
+        UIlabel.position.set(0, 11, 0);
     }
 
     function drawAxes() {
@@ -231,6 +288,7 @@ function makeModel (data, range, minList, maxList) {
         axisGeometry.addAttribute('position', new THREE.Float32BufferAttribute(axisPosisitons, 3));
         axis = new THREE.LineSegments( axisGeometry, axisMaterial );
         scene.add(axis);
+        axis.rotateY(Math.PI);
     }
     function drawCircle() {
         let circlePositions = [];
@@ -265,6 +323,7 @@ function makeModel (data, range, minList, maxList) {
         });
         plot = new THREE.LineSegments(circleGeometry, circleMaterial);
         scene.add(plot);
+        plot.rotateY(Math.PI);
     }
 }
 
@@ -277,9 +336,10 @@ function setGUIControls() {
         reset: function () {
             camera.position.x = 0;
             camera.position.y = 0;
-            camera.position.z = -50;
+            camera.position.z = 50;
         },
         grid: true,
+        label: true,
         axis: true,
         plot: true,
         plotColor: [127, 255, 212],
@@ -292,12 +352,12 @@ function setGUIControls() {
         this.switchCamera = function () {
             if (camera instanceof THREE.PerspectiveCamera) {
                 camera = camera_set[1];
-                camera.position.z = -50;
+                camera.position.z = 50;
                 camera.lookAt(scene.position);
                 this.perspective = "Orthographic";
             } else {
                 camera = camera_set[0];
-                camera.position.z = -50;
+                camera.position.z = 50;
 
                 camera.lookAt(scene.position);
                 this.perspective = "Perspective";
@@ -320,6 +380,11 @@ function setGUIControls() {
     display.add(GUIoptions, 'grid').onChange(function (e) {
         grid.visible = e;
     });
+    display.add(GUIoptions, 'label').onChange(function (e) {
+       for (let i = 0; i < labels.length; i++) {
+           labels[i].visible = e;
+       }
+    });
     display.add(GUIoptions, 'axis').onChange(function (e) {
         axis.visible = e;
     });
@@ -328,7 +393,7 @@ function setGUIControls() {
     plotGUIs.add(GUIoptions, 'plot').onChange(function (e) {
         plot.visible = e;
     });
-    let color = plotGUIs.addColor(GUIoptions, 'plotColor').onChange(function (e) {
+    plotGUIs.addColor(GUIoptions, 'plotColor').onChange(function (e) {
         plot.material.color.setRGB(e[0] / 255, e[1] / 255, e[2] / 255);
     });
     plotGUIs.open();
@@ -427,8 +492,8 @@ function onResize() {
 
 function onMouseWheel(event) {
     // 1 scroll = 100 in deltaY
-    let del = tube.position.z - event.deltaY / 100;
-    if (del > 0) {
+    let del = tube.position.z + event.deltaY / 100;
+    if (del < 0) {
         tube.position.z = 0;
         axis.position.z = 0;
         plot.position.z = 0;

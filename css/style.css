@@ -12,22 +12,38 @@ table {
 th {
     padding: 8px;
     text-align: center;
-    color: white;
-    border-bottom: 1px solid #ddd;
+    /*color: #dcdcdc;*/
+    /*border-bottom: 1px solid #ddd;*/
     background-color: slategray;
 }
 
 td {
      padding: 8px;
      text-align: left;
-     border-bottom: 1px solid #ddd;
+     /*border-bottom: 1px solid #ddd;*/
  }
 
-.table_values td {
-    padding: 2px 5px;
+output {
+    position: absolute;
+    /*left: 30px;*/
+    /*top: -10px;*/
+    display: none;
+    margin-left: 15px;
+    width: 40px;
+    height: 24px;
+    /*border: 1px solid #e2e2e2;*/
+    background-color: #fff;
+    border-radius: 3px;
+    color: #777;
+    font-size: .8em;
+    line-height: 24px;
+    text-align: center;
+}
 
+.table_values td {
+    padding: 3px 10px;
     text-align: left;
-    border: 1px solid #ddd;
+    border: 1px solid #a9a9a9;
 }
 
 .label_values {
@@ -44,27 +60,6 @@ td {
     color: white;
     position: absolute;
     padding: 15px 10px;
-}
-
-#file_input {
-    color: white;
-    background: rgba(0, 0, 0, 0.75);
-    padding: 15px 10px;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    z-index: 2;
-}
-
-#panel_values {
-    background: rgba(0, 0, 0, 0.75);
-    left: 0px;
-    width: 200px;
-    z-index: 3;
-}
-
-#WebGL-TimeTubes {
-    z-index: 1;
 }
 
 .scrollbox {
@@ -127,4 +122,85 @@ td {
 }
 .tab_panel.active{
     display:block;
+}
+
+.panel_label {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    /*color: #000;*/
+    font-family: Arial, Helvetica, sans-serif;
+    /*font-weight: bolder;*/
+    /*font-size: 1.1em;*/
+    padding: 2px 8px;
+    margin: 4px 0px;
+}
+
+#file_names {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#file_input {
+    color: white;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 15px 10px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
+}
+
+#panel_values {
+    background: rgba(0, 0, 0, 0.75);
+    left: 0px;
+    width: 200px;
+    z-index: 3;
+}
+
+#WebGL-TimeTubes {
+    z-index: 1;
+}
+
+#observation_period {
+    margin: 10px 0px;
+}
+
+#observation_period_values {
+    padding: 3px 10px;
+}
+
+#file_type {
+    margin: 5px 0px;
+}
+
+#color_map {
+    margin-left: 10px;
+    float: left;
+}
+
+#color_value {
+    height: 150px;
+    float: left;
+}
+
+#color_value_max {
+    top: -10px;
+}
+
+#color_value_min {
+    bottom: -10px;
+}
+
+#color_hue {
+    margin-top: 5px;
+    margin-left: 20px;
+    width: 150px;
+}
+
+#color_hue_max {
+    bottom: 18px;
+}
+
+#color_hue_min {
+    bottom: 18px;
 }

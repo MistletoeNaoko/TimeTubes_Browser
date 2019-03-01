@@ -10,6 +10,7 @@ let dataSplines = [];
 let files = [];
 
 let reader = new FileReader();
+
 function loadFile() {
     let file = document.querySelector('input[type=file]').files[0];
     files.push(file);
@@ -79,6 +80,8 @@ function parseFile() {
     blazarData.push(dataTmp);
     let dataIdx = blazarData.length - 1;
     // insertDataListRow(file.name, Object.keys(dataTmp[0]), Math.round(file.size / 1024));
+    showFileName(files.length - 1);
+    showObservationPeriod(dataIdx);
     calcMinMax(dataIdx);
     calcStd(dataIdx);
     calcMagRate(dataIdx);
@@ -86,6 +89,15 @@ function parseFile() {
     init(dataIdx);
 }
 
+function showFileName(idx) {
+    let ele = document.getElementById('file_names');
+    ele.innerHTML = files[idx].name;
+}
+
+function showObservationPeriod(idx) {
+    let ele = document.getElementById("observation_period_values");
+    ele.innerHTML = blazarData[idx][0]['JD'] + ' - ' + blazarData[idx][blazarData[idx].length - 1]['JD'];
+}
 function calcMinMax(idx) {
     blazarMin[idx] = {};
     blazarMax[idx] = {};

@@ -2,9 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54f264b0-4a6a-4188-b6a7-9c6f14ab4bc0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/js/filtering_color.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TimeTubes_Demo.html" beforeDir="false" afterPath="$PROJECT_DIR$/TimeTubes_Demo.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/TimeTubes.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/TimeTubes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/loadFile.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/loadFile.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -38,7 +40,7 @@
           <entry key="css" value="3" />
           <entry key="glsl" value="1" />
           <entry key="html" value="2" />
-          <entry key="js" value="30" />
+          <entry key="js" value="31" />
           <entry key="png" value="3" />
           <entry key="rnc" value="1" />
           <entry key="vertex_tube" value="1" />
@@ -49,24 +51,24 @@
           <entry key="CSS" value="3" />
           <entry key="HTML" value="2" />
           <entry key="Image" value="3" />
-          <entry key="JavaScript" value="30" />
+          <entry key="JavaScript" value="31" />
           <entry key="PLAIN_TEXT" value="2" />
           <entry key="RNG Compact" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="css" value="575" />
+          <entry key="css" value="1345" />
           <entry key="glsl" value="1" />
-          <entry key="html" value="8039" />
-          <entry key="js" value="30034" />
+          <entry key="html" value="8602" />
+          <entry key="js" value="31088" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="CSS" value="575" />
-          <entry key="HTML" value="8039" />
-          <entry key="JavaScript" value="30034" />
+          <entry key="CSS" value="1345" />
+          <entry key="HTML" value="8602" />
+          <entry key="JavaScript" value="31088" />
           <entry key="PLAIN_TEXT" value="1" />
         </counts>
       </usages-collector>
@@ -77,20 +79,38 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/TimeTubes_Demo.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="575">
-              <caret line="175" column="4" selection-start-line="175" selection-start-column="4" selection-end-line="175" selection-end-column="4" />
+            <state relative-caret-position="276">
+              <caret line="22" column="68" selection-start-line="22" selection-start-column="68" selection-end-line="22" selection-end-column="68" />
+              <folding>
+                <element signature="n#style#0;n#input#0;n#label#0;n#div#1;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#2;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/css/style.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1283">
+              <caret line="200" column="17" selection-start-line="200" selection-start-column="17" selection-end-line="200" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/filtering_color.js">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/loadFile.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="138">
-              <caret line="6" column="10" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="10" />
+            <state relative-caret-position="253">
+              <caret line="11" column="30" selection-start-line="11" selection-start-column="30" selection-end-line="11" selection-end-column="30" />
             </state>
           </provider>
         </entry>
@@ -98,26 +118,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/TimeTubes.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="433">
-              <caret line="232" column="32" lean-forward="true" selection-start-line="232" selection-start-column="32" selection-end-line="232" selection-end-column="32" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/js/updateDataListTable.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="23">
-              <caret line="28" column="5" lean-forward="true" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/css/style.css">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="575">
-              <caret line="46" column="1" selection-start-line="46" selection-start-column="1" selection-end-line="46" selection-end-column="1" />
+            <state relative-caret-position="479">
+              <caret line="210" column="61" lean-forward="true" selection-start-line="210" selection-start-column="33" selection-end-line="210" selection-end-column="61" />
             </state>
           </provider>
         </entry>
@@ -135,8 +137,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>THREE.P</find>
-      <find>THREE.Po</find>
       <find>THREE.Point</find>
       <find>unshift</find>
       <find>result\.x \= CatmullRom\(points\[Idx\]\.x\, points\[Ti \+ 1\]\.x\, points\[Ti \+ 2\]\.x\, points\[Ti \+ 3\]\.x\, Td\)\;\n    result\.y \= CatmullRom\(points\[Idx\]\.y\, points\[Ti \+ 1\]\.y\, points\[Ti \+ 2\]\.y\, points\[Ti \+ 3\]\.y\, Td\)\;\n    result\.z \= CatmullRom\(points\[Idx\]\.z\, points\[Ti \+ 1\]\.z\, points\[Ti \+ 2\]\.z\, points\[Ti \+ 3\]\.z\, Td\)\;</find>
@@ -164,6 +164,8 @@
       <find>interp</find>
       <find>rotat</find>
       <find>looka</find>
+      <find>si</find>
+      <find>size</find>
       <find>rotate</find>
     </findStrings>
     <replaceStrings>
@@ -191,10 +193,11 @@
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/js/lib/dat.gui.min.js" />
         <option value="$PROJECT_DIR$/js/slider.js" />
-        <option value="$PROJECT_DIR$/js/loadFile.js" />
-        <option value="$PROJECT_DIR$/TimeTubes_Demo.html" />
         <option value="$PROJECT_DIR$/js/TimeTubes.js" />
+        <option value="$PROJECT_DIR$/js/loadFile.js" />
+        <option value="$PROJECT_DIR$/js/filtering_color.js" />
         <option value="$PROJECT_DIR$/css/style.css" />
+        <option value="$PROJECT_DIR$/TimeTubes_Demo.html" />
       </list>
     </option>
   </component>
@@ -211,10 +214,9 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="2391" />
-    <option name="y" value="-463" />
-    <option name="width" value="960" />
-    <option name="height" value="1008" />
+    <option name="x" value="-7" />
+    <option name="width" value="974" />
+    <option name="height" value="1047" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -261,6 +263,12 @@
               <item name="TimeTubes" type="462c0819:PsiDirectoryNode" />
               <item name="js" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="TimeTubes" type="b2602c69:ProjectViewProjectNode" />
+              <item name="TimeTubes" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -278,12 +286,12 @@
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\naoko\Harvard\TimeTubes\js" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\naoko\Harvard\TimeTubes\shader" />
       <recent name="C:\Users\naoko\Harvard\TimeTubes\js\lib" />
+      <recent name="C:\Users\naoko\Harvard\TimeTubes\js" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\naoko\Harvard\TimeTubes\js" />
     </key>
   </component>
@@ -344,19 +352,19 @@
       <workItem from="1550344225502" duration="20375000" />
       <workItem from="1550542971615" duration="60501000" />
       <workItem from="1550860386277" duration="25256000" />
-      <workItem from="1551209492353" duration="23228000" />
+      <workItem from="1551209492353" duration="41601000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="311788000" />
+    <option name="totallyTimeSpent" value="330161000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1912" y="-558" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.492865" visible="true" weight="0.17324908" />
-      <window_info active="true" id="Structure" order="1" sideWeight="0.50713503" side_tool="true" visible="true" weight="0.17324908" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4917673" visible="true" weight="0.16587678" />
+      <window_info id="Structure" order="1" sideWeight="0.5082327" side_tool="true" visible="true" weight="0.16587678" />
       <window_info id="Favorites" order="2" sideWeight="0.50678176" side_tool="true" weight="0.33070037" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32815966" />
@@ -373,25 +381,6 @@
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
     </layout>
-    <layout-to-restore>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4955654" weight="0.27854857" />
-      <window_info id="Structure" order="1" sideWeight="0.5044346" side_tool="true" visible="true" weight="0.27854857" />
-      <window_info id="Favorites" order="2" sideWeight="0.50678176" side_tool="true" weight="0.33084312" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32815966" />
-      <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39956093" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" weight="0.09989023" />
-      <window_info anchor="bottom" id="Terminal" order="9" />
-      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.32930845" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -469,13 +458,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/updateDataListTable.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="23">
-          <caret line="28" column="5" lean-forward="true" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/lib/three_tubes.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="203">
@@ -483,31 +465,45 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/loadFile.js">
+    <entry file="file://$PROJECT_DIR$/js/updateDataListTable.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="138">
-          <caret line="6" column="10" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/TimeTubes_Demo.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="575">
-          <caret line="175" column="4" selection-start-line="175" selection-start-column="4" selection-end-line="175" selection-end-column="4" />
+        <state relative-caret-position="230">
+          <caret line="28" column="5" lean-forward="true" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/TimeTubes.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="433">
-          <caret line="232" column="32" lean-forward="true" selection-start-line="232" selection-start-column="32" selection-end-line="232" selection-end-column="32" />
+        <state relative-caret-position="479">
+          <caret line="210" column="61" lean-forward="true" selection-start-line="210" selection-start-column="33" selection-end-line="210" selection-end-column="61" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/js/loadFile.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="253">
+          <caret line="11" column="30" selection-start-line="11" selection-start-column="30" selection-end-line="11" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/filtering_color.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/css/style.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="575">
-          <caret line="46" column="1" selection-start-line="46" selection-start-column="1" selection-end-line="46" selection-end-column="1" />
+        <state relative-caret-position="1283">
+          <caret line="200" column="17" selection-start-line="200" selection-start-column="17" selection-end-line="200" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/TimeTubes_Demo.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="276">
+          <caret line="22" column="68" selection-start-line="22" selection-start-column="68" selection-end-line="22" selection-end-column="68" />
+          <folding>
+            <element signature="n#style#0;n#input#0;n#label#0;n#div#1;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#2;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

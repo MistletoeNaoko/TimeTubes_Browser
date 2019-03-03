@@ -394,15 +394,17 @@ function setGUIControls() {
     cam.open();
 
     tube = gui.addFolder('Tube');
-    tube.add(
+    let tubePos = tube.add(
         GUIoptions,
         'tubePosition',
         blazarData[tube_group.userData.idx][0]['JD'],
         blazarData[tube_group.userData.idx][blazarNum[tube_group.userData.idx]['JD'] - 1]['JD']).onChange(function (e) {
-    }).onChange(function (e) {
+    }).listen();
+    tubePos.onChange(function (e) {
         tube_group.position.z = e - blazarData[tube_group.userData.idx][0]['JD'];
         showCurrentVal(tube_group.userData.idx, tube_group.position.z);
-    });
+    })
+    tube.open();
 
     display = gui.addFolder('Display');
     display.add(GUIoptions, 'grid').onChange(function (e) {
@@ -552,6 +554,9 @@ function onMouseWheel(event) {
         }
     }
     tube_group.position.z = del;
+    console.log(gui.__folders.Tube.__controllers[0]);
+    gui.__folders.Tube.__controllers[0].setValue(del + blazarData[idx][0]['JD']);
+    // gui.tubePosition.setValue(del + blazarData[idx][0]['JD']);
     showCurrentVal(tube_group.userData.idx, del);
 }
 

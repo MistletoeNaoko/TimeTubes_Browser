@@ -16,6 +16,10 @@ $( function() {
             let maxPos = -10 + 150 - 150 * (ui.values[1] - min) / range;
             $('#color_value_min').css('bottom', minPos + 'px');
             $('#color_value_max').css('top', maxPos + 'px');
+            if (blazarData[0].length !== 0) {
+                let rangeFL = blazarMax[0]['Flx(V)'] - blazarMin[0]['Flx(V)'];
+                tube.material.uniforms.minmaxFlx.value = new THREE.Vector2(ui.values[0] / 100 * rangeFL + blazarMin[0]['Flx(V)'], ui.values[1] / 100 * rangeFL + blazarMin[0]['Flx(V)']);
+            }
         },
         stop: function () {
             $('#color_value_min').css('display', 'none');
@@ -42,6 +46,10 @@ $( function() {
             let maxPos = -20 + 150 - 150 * ui.values[1] / 100;
             $('#color_hue_min').css('left', minPos + 'px');
             $('#color_hue_max').css('right', maxPos + 'px');
+            if (blazarData[0].length !== 0) {
+                let rangeVJ = blazarMax[0]['V-J'] - blazarMin[0]['V-J'];
+                tube.material.uniforms.minmaxVJ.value = new THREE.Vector2(ui.values[0] / 100 * rangeVJ + blazarMin[0]['V-J'], ui.values[1] / 100 * rangeVJ + blazarMin[0]['V-J']);
+            }
         },
         stop: function () {
             $('#color_hue_min').css('display', 'none');

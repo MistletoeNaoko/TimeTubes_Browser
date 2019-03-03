@@ -10,8 +10,10 @@ $( function() {
             $('#color_value_max').css('display', 'initial');
             $('#color_value_min').val(ui.values[0]);
             $('#color_value_max').val(ui.values[1]);
-            let minPos = -10 + 150 * ui.values[0] / 100;
-            let maxPos = -10 + 150 - 150 * ui.values[1] / 100;
+            let min = $('#color_value').slider("option", "min");
+            let range = $('#color_value').slider("option", "max") - min;
+            let minPos = -10 + 150 * (ui.values[0] - min) / range;
+            let maxPos = -10 + 150 - 150 * (ui.values[1] - min) / range;
             $('#color_value_min').css('bottom', minPos + 'px');
             $('#color_value_max').css('top', maxPos + 'px');
         },

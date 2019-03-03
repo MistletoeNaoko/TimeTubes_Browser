@@ -98,6 +98,7 @@ function showObservationPeriod(idx) {
     let ele = document.getElementById("observation_period_values");
     ele.innerHTML = blazarData[idx][0]['JD'] + ' - ' + blazarData[idx][blazarData[idx].length - 1]['JD'];
 }
+
 function calcMinMax(idx) {
     blazarMin[idx] = {};
     blazarMax[idx] = {};

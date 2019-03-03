@@ -7,12 +7,14 @@ let camera_para = {};
 let scene;
 let renderer;
 let controls;
+let tube_group;
 let tube;
 let grid;
 let labels = [];
 let axis;
 let plot;
 let clippingPlane;
+let animation_para = {flag: false, dep: 0, dst:0, speed: 40, now: 0};
 
 const segment = 16;
 
@@ -20,13 +22,15 @@ const gui = new dat.GUI();
 let GUIoptions;
 
 function init(idx) {
-    initializeScene('WebGL-TimeTubes', blazarData[idx]);
-    makeModel(blazarData[idx], blazarRange[idx], blazarMin[idx], blazarMax[idx]);
+    initializeScene('WebGL-TimeTubes', idx);
+    tube_group = new THREE.Group();
+    tube_group.userData = {idx: idx};
+    makeModel(idx);
     setGUIControls();
     animate();
 }
 
-function initializeScene(id, data) {
+function initializeScene(id, idx) {
     scene = new THREE.Scene();
     renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(new THREE.Color(0x000000), 1.0);
@@ -34,11 +38,10 @@ function initializeScene(id, data) {
     renderer.localClippingEnabled = true;
     document.getElementById(id).appendChild(renderer.domElement);
     document.addEventListener('wheel', onMouseWheel, false);
-    // renderer.sortObjects = false;
     clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
 
     camera_para['fov'] = 45;
-    camera_para['far'] = Math.ceil(data[data.length - 1]['JD'] - data[0]['JD']) + 50;
+    camera_para['far'] = Math.ceil(blazarData[idx][blazarNum[idx]['JD'] - 1]['JD'] - blazarData[idx][0]['JD']) + 50;
     camera_para['depth'] = Math.tan(camera_para['fov'] / 2.0 * Math.PI / 180.0) * 2;
     camera_para['aspect'] = ($(window).width()) / $(window).height();
     let size_y = camera_para['depth'] * (50);
@@ -68,11 +71,17 @@ function initializeScene(id, data) {
     }
 }
 
-function makeModel (data, range, minList, maxList) {
+function makeModel (idx) {
+    let data = blazarData[idx];
+    let range = blazarRange[idx];
+    let minList = blazarMin[idx];
+    let maxList = blazarMax[idx];
+
     let points = [];        // To create spline curve
     let positions = [];     // Pass position (Q/I, U/I) list to the shader
     let radiuses = [];      // Pass radius (E_Q/I, E_U/I) list to the shader
     let colors = [];        // Pass color (V-J, Flx(V)) list to the shader
+
     for (let i = 0; i < data.length; ++i) {
         points.push(new THREE.Vector3(0, 0, data[i]['JD'] - data[0]['JD']));
 
@@ -91,11 +100,13 @@ function makeModel (data, range, minList, maxList) {
     // Render a tube after finishing loading a texture
     let tubeTexture = new THREE.TextureLoader();
     tubeTexture.load('img/1_256.png', function (texture) {
+        scene.add(tube_group);
         createTube(texture);
         drawGrids(20, 10);
         drawLabels(10 / range);
         drawAxes();
         drawCircle();
+        showCurrentVal(tube_group.position.z);
     });
 
     // Add extra data values to the arrays to compute Catmull splines
@@ -182,7 +193,7 @@ function makeModel (data, range, minList, maxList) {
             clippingPlanes: [clippingPlane]
         });
         tube = new THREE.Mesh(tubeGeometry, tubeShaderMaterial);
-        scene.add(tube);
+        tube_group.add(tube);
         tube.rotateY(Math.PI);
     }
 
@@ -287,7 +298,7 @@ function makeModel (data, range, minList, maxList) {
         axisGeometry.setIndex(axisIndices);
         axisGeometry.addAttribute('position', new THREE.Float32BufferAttribute(axisPosisitons, 3));
         axis = new THREE.LineSegments( axisGeometry, axisMaterial );
-        scene.add(axis);
+        tube_group.add(axis);
         axis.rotateY(Math.PI);
     }
     function drawCircle() {
@@ -322,7 +333,7 @@ function makeModel (data, range, minList, maxList) {
             clippingPlanes: [clippingPlane]
         });
         plot = new THREE.LineSegments(circleGeometry, circleMaterial);
-        scene.add(plot);
+        tube_group.add(plot);
         plot.rotateY(Math.PI);
     }
 }
@@ -330,6 +341,7 @@ function makeModel (data, range, minList, maxList) {
 function setGUIControls() {
     let cam, camPos,
         camx, camy, camz, camfar,
+        tube,
         display;//, background;
 
     GUIoptions = {
@@ -338,6 +350,7 @@ function setGUIControls() {
             camera.position.y = 0;
             camera.position.z = 50;
         },
+        tubePosition: blazarData[tube_group.userData.idx][0]['JD'],
         grid: true,
         label: true,
         axis: true,
@@ -348,17 +361,21 @@ function setGUIControls() {
     };
 
     let switchCamera = new function () {
+        let current_pos = camera.position;
         this.perspective = "Perspective";
         this.switchCamera = function () {
             if (camera instanceof THREE.PerspectiveCamera) {
                 camera = camera_set[1];
-                camera.position.z = 50;
+                camera.position.x = current_pos.x;
+                camera.position.y = current_pos.y;
+                camera.position.z = current_pos.z;
                 camera.lookAt(scene.position);
                 this.perspective = "Orthographic";
             } else {
                 camera = camera_set[0];
-                camera.position.z = 50;
-
+                camera.position.x = current_pos.x;
+                camera.position.y = current_pos.y;
+                camera.position.z = current_pos.z;
                 camera.lookAt(scene.position);
                 this.perspective = "Perspective";
             }
@@ -375,6 +392,17 @@ function setGUIControls() {
     camPos = cam.addFolder('Position');
     addCameraControl();
     cam.open();
+
+    tube = gui.addFolder('Tube');
+    tube.add(
+        GUIoptions,
+        'tubePosition',
+        blazarData[tube_group.userData.idx][0]['JD'],
+        blazarData[tube_group.userData.idx][blazarNum[tube_group.userData.idx]['JD'] - 1]['JD']).onChange(function (e) {
+    }).onChange(function (e) {
+        tube_group.position.z = e - blazarData[tube_group.userData.idx][0]['JD'];
+        showCurrentVal(tube_group.userData.idx, tube_group.position.z);
+    });
 
     display = gui.addFolder('Display');
     display.add(GUIoptions, 'grid').onChange(function (e) {
@@ -443,7 +471,7 @@ function addControls() {
 
 function currentValues(idx, posZ) {
     // Get the current JD
-    let currentJD = -1 * posZ + blazarData[idx][0]['JD'];
+    let currentJD = posZ + blazarData[idx][0]['JD'];
     let i;
     for (i = 1; i < blazarData[idx].length; i++) {
         if (blazarData[idx][i - 1]['JD'] <= currentJD && currentJD < blazarData[idx][i]['JD'])
@@ -453,16 +481,16 @@ function currentValues(idx, posZ) {
     if (i >= blazarData[idx].length - 1) {
         u = 1;
     } else {
-        u = (i - 1 + (currentJD - blazarData[idx][i - 1]['JD']) / (blazarData[idx][i]['JD'] - blazarData[idx][i - 1]['JD'])) / blazarData[idx].length;
+        u = ((i - 1) + (currentJD - blazarData[idx][i - 1]['JD']) / (blazarData[idx][i]['JD'] - blazarData[idx][i - 1]['JD'])) / (blazarData[idx].length - 1);
     }
-    let pos = dataSplines[idx]['position'].getPointAt(u);
-    let err = dataSplines[idx]['error'].getPointAt(u);
-    let col = dataSplines[idx]['error'].getPointAt(u);
+    let pos = dataSplines[idx]['position'].getPoint(u);
+    let err = dataSplines[idx]['error'].getPoint(u);
+    let col = dataSplines[idx]['error'].getPoint(u);
     return [pos.z, pos.x, err.x, pos.y, err.y, col.x, col.y]; //JD, QI, EQI, UI, EUI, VJ, Flx
 }
 
-function showCurrentVal(pos) {
-    let currentval = currentValues(0, pos);
+function showCurrentVal(idx, pos) {
+    let currentval = currentValues(idx, pos);
     let JD = document.getElementById('JD_value');
     JD.innerHTML = currentval[0].toFixed(2);
     let QI = document.getElementById('QI_value');
@@ -479,30 +507,64 @@ function showCurrentVal(pos) {
     FL.innerHTML = currentval[6].toExponential(2);
 }
 
+function moveTube() {
+    if (animation_para.flag) {
+        requestAnimationFrame(moveTube);
+        renderer.render(scene, camera);
+        animation_para.now += 1;
+        let anim = (1 - Math.cos(Math.PI * animation_para.now / animation_para.speed)) / 2;
+        tube_group.position.z = animation_para.dep + (animation_para.dst - animation_para.dep) * anim;
+        console.log(animation_para.dep, tube_group.position.z, animation_para.dst);
+        if (animation_para.now == animation_para.speed) {
+            animation_para.flag = false;
+            animation_para.now = 0;
+            animation_para.dep = 0;
+            animation_para.dst = 0;
+        }
+    } else {
+        animation_para.flag = false;
+        animation_para.dst = 0;
+    }
+}
+
 function onResize() {
     camera.aspect = ($(window).width()) / $(window).height();
     // camera.updateProjectionMatrix();
     renderer.setSize($(window).width(), $(window).height());//window.innerWidth, window.innerHeight);
     camera.updateProjectionMatrix();
-
-    console.log(($(window).width()), $(window).height());
-    console.log(window.innerWidth, window.innerHeight);
-    console.log(document.documentElement.clientWidth, document.documentElement.clientHeight);
 }
 
 function onMouseWheel(event) {
     // 1 scroll = 100 in deltaY
-    let del = tube.position.z + event.deltaY / 100;
+    let now = tube_group.position.z;
+    let del = tube_group.position.z + event.deltaY / 100;
+    let idx = tube_group.userData.idx;
     if (del < 0) {
-        tube.position.z = 0;
-        axis.position.z = 0;
-        plot.position.z = 0;
-    } else {
-        tube.position.z = del;
-        axis.position.z = del;
-        plot.position.z = del;
+        del = 0;
+    } else if (del > blazarData[idx][blazarNum[idx]['JD'] - 1]['JD'] -  blazarData[idx][0]['JD']) {
+        del = blazarData[idx][blazarNum[idx]['JD'] - 1]['JD'] - blazarData[idx][0]['JD'];
     }
-    showCurrentVal(del);
+    for (let i = 0; i < blazarNum[idx]['JD']; i++) {
+        let tmp = blazarData[idx][i]['JD'] - blazarData[idx][0]['JD'];
+        if (Math.min(now, del) < tmp && tmp < Math.max(now, del)) {
+            del = tmp;
+            break;
+        }
+    }
+    tube_group.position.z = del;
+    showCurrentVal(tube_group.userData.idx, del);
+}
+
+function TimeSearch() {
+    let ele = document.getElementById('time_search_input').value - blazarData[0][0]['JD'];
+    if (isNaN(ele)) {
+        alert('Please input numbers.');
+    } else {
+        animation_para.flag = true;
+        animation_para.dep = tube_group.position.z;
+        animation_para.dst = ele;
+        moveTube();
+    }
 }
 
 function animate() {

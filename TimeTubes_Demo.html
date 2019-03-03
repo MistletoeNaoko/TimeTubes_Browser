@@ -10,7 +10,7 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
-    <script type="text/javascript" src="js/lib/bootstrap-slider.js"></script>
+    <!--<script type="text/javascript" src="js/lib/bootstrap-slider.js"></script>-->
     <script type="text/javascript" src="js/lib/three.min.js"></script>
     <script src="https://unpkg.com/three.texttexture"></script>
     <script src="https://unpkg.com/three.textsprite"></script>
@@ -34,7 +34,7 @@
             <label for="file_photo">
                 <img src="img/1_256.png" width="150" height="150">
                 <!--style="margin-left: 30px;">-->
-                <input type="file" id="file_photo" style="display:none;">
+                <!--<input type="file" id="file_photo" style="display:none;">-->
             </label>
         </div>
         <div style='clear:both'></div>
@@ -43,49 +43,62 @@
             <output id="color_hue_min"></output>
         </div>
     </div>
-    <!--<div id="slider-hue"></div>-->
+    <div id="slider-hue"></div>
     <div id="values">
         <div id="observation_period">
             <div class="panel_label">
                 Observation period
             </div>
             <div id="observation_period_values">
-                -
+                 -
             </div>
         </div>
-        <div class="panel_label">
-            Current values
+        <div id="current_values">
+            <div class="panel_label">
+                Current values
+            </div>
+            <table class="table_values">
+                <tr>
+                    <td class="label_values"><i>JD</i></td>
+                    <td class="current_values" id="JD_value"></td>
+                </tr>
+                <tr>
+                    <td class="label_values"><i>Q/I</i></td>
+                    <td class="current_values" id="QI_value"></td>
+                </tr>
+                <tr>
+                    <td class="label_values"><i>E_Q/I</i></td>
+                    <td class="current_values"id="EQI_value"></td>
+                </tr>
+                <tr>
+                    <td class="label_values"><i>U/I</i></td>
+                    <td class="current_values" id="UI_value"></td>
+                </tr>
+                <tr>
+                    <td class="label_values"><i>E_U/I</i></td>
+                    <td class="current_values" id="EUI_value"></td>
+                </tr>
+                <tr>
+                    <td class="label_values"><i>V-J</i></td>
+                    <td class="current_values" id="VJ_value"></td>
+                </tr>
+                <tr>
+                    <td class="label_values"><i>Flx(V)</i></td>
+                    <td class="current_values" id="FL_value"></td>
+                </tr>
+            </table>
         </div>
-        <table class="table_values">
-            <tr>
-                <td class="label_values"><i>JD</i></td>
-                <td class="current_values" id="JD_value"></td>
-            </tr>
-            <tr>
-                <td class="label_values"><i>Q/I</i></td>
-                <td class="current_values" id="QI_value"></td>
-            </tr>
-            <tr>
-                <td class="label_values"><i>E_Q/I</i></td>
-                <td class="current_values"id="EQI_value"></td>
-            </tr>
-            <tr>
-                <td class="label_values"><i>U/I</i></td>
-                <td class="current_values" id="UI_value"></td>
-            </tr>
-            <tr>
-                <td class="label_values"><i>E_U/I</i></td>
-                <td class="current_values" id="EUI_value"></td>
-            </tr>
-            <tr>
-                <td class="label_values"><i>V-J</i></td>
-                <td class="current_values" id="VJ_value"></td>
-            </tr>
-            <tr>
-                <td class="label_values"><i>Flx(V)</i></td>
-                <td class="current_values" id="FL_value"></td>
-            </tr>
-        </table>
+    </div>
+    <div id="time_search">
+        <div class="panel_label">
+            Time search
+        </div>
+        <form id="time_search_form">
+            <div class="form-row">
+            <input type="text" id="time_search_input" name="time_search_input" class="form-control" size="10">
+            <button type="button" id="time_search_button" name="time_search_button" class="btn btn-light  btn-sm" onclick="TimeSearch()">Search</button>
+            </div>
+        </form>
     </div>
     <!--<input id="ex2" type="text" class="span2" value="" data-slider-min="10" data-slider-max="1000" data-slider-step="5" data-slider-value="[250,450]"/>-->
 </div>

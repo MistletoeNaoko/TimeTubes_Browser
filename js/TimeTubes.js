@@ -15,7 +15,7 @@ let axis;
 let plot;
 let clippingPlane;
 let animation_para = {flag: false, dep: 0, dst:0, speed: 40, now: 0};
-
+let current_focused_idx;
 const segment = 16;
 
 const gui = new dat.GUI();
@@ -303,6 +303,8 @@ function makeModel (idx) {
     }
     function drawCircle() {
         let circlePositions = [];
+        let circleColor = [];
+        let baseColor = new THREE.Color('rgb(127, 255, 212)');
         let circleIndices = Array(data.length * segment * 2);
         let del = Math.PI * 2 / segment;
         for (let i = 0; i < data.length; i++) {
@@ -319,6 +321,11 @@ function makeModel (idx) {
                 circlePositions.push(xcent + xrad * Math.cos(del * j));
                 circlePositions.push(ycent + yrad * Math.sin(del * j));
                 circlePositions.push(zpos);
+
+                circleColor.push(baseColor.r);
+                circleColor.push(baseColor.g);
+                circleColor.push(baseColor.b);
+
                 if (j !== 0) {
                     circleIndices[currentIdx + 2 * (j - 1) + 1] = i * segment + j;
                     circleIndices[currentIdx + 2 * (j - 1) + 2] = i * segment + j;
@@ -328,8 +335,11 @@ function makeModel (idx) {
         let circleGeometry = new THREE.BufferGeometry();
         circleGeometry.setIndex(circleIndices);
         circleGeometry.addAttribute('position', new THREE.Float32BufferAttribute(circlePositions, 3));
+        circleGeometry.addAttribute('color', new THREE.Float32BufferAttribute(circleColor, 3));
+
         let circleMaterial = new THREE.LineBasicMaterial({
-            color: new THREE.Color('rgb(127, 255, 212)'),
+            // color: new THREE.Color('rgb(127, 255, 212)'),
+            vertexColors: THREE.VertexColors,
             clippingPlanes: [clippingPlane]
         });
         plot = new THREE.LineSegments(circleGeometry, circleMaterial);
@@ -516,7 +526,6 @@ function moveTube() {
         animation_para.now += 1;
         let anim = (1 - Math.cos(Math.PI * animation_para.now / animation_para.speed)) / 2;
         tube_group.position.z = animation_para.dep + (animation_para.dst - animation_para.dep) * anim;
-        console.log(animation_para.dep, tube_group.position.z, animation_para.dst);
         if (animation_para.now == animation_para.speed) {
             animation_para.flag = false;
             animation_para.now = 0;
@@ -550,14 +559,23 @@ function onMouseWheel(event) {
         let tmp = blazarData[idx][i]['JD'] - blazarData[idx][0]['JD'];
         if (Math.min(now, del) < tmp && tmp < Math.max(now, del)) {
             del = tmp;
+            let color = gui.__folders.Display.__folders.Plot.__controllers[1].object.plotColor;
+            changePlotColor(current_focused_idx * segment, new THREE.Color(color[0] / 255, color[1] / 255, color[2] / 255));
+            changePlotColor(i * segment, new THREE.Color('red'));
+            current_focused_idx = i;
             break;
         }
     }
     tube_group.position.z = del;
-    console.log(gui.__folders.Tube.__controllers[0]);
     gui.__folders.Tube.__controllers[0].setValue(del + blazarData[idx][0]['JD']);
-    // gui.tubePosition.setValue(del + blazarData[idx][0]['JD']);
     showCurrentVal(tube_group.userData.idx, del);
+}
+
+function changePlotColor(idx, color) {
+    for (let i = 0; i < segment; i++) {
+        plot.geometry.attributes.color.needsUpdate = true;
+        plot.geometry.attributes.color.setXYZ(idx + i, color.r, color.g, color.b);
+    }
 }
 
 function TimeSearch() {

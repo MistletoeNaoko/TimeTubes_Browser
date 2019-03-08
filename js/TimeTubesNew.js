@@ -3,16 +3,8 @@ class TimeTubes {
     constructor(idx, o_tubeNum, o_segment) {
         // frequently used values related to data
         this.idx = idx;
-        if (o_tubeNum === undefined) {
-            this.tubeNum = 1;
-        } else {
-            this.tubeNum = o_tubeNum;
-        }
-        if (o_segment === undefined) {
-            this.segment = 16;
-        } else {
-            this.segment = o_segment;
-        }
+        this.tubeNum = o_tubeNum || 1;
+        this.segment = o_segment || 16;
         this.data = blazarData[this.idx];
         this.minJD = blazarData[this.idx][0]['JD'];
         this.numJD = blazarNum[this.idx]['JD'];

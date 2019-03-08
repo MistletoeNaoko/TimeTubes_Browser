@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <!--<link rel="stylesheet" href="/resources/demos/style.css">-->
 </head>
-<body onresize="onResize()">
+<body>
 <div id="panel_values" class="menu">
     <div id="file_names"></div>
     <div id="color_filter">
@@ -96,7 +96,7 @@
         <form id="time_search_form">
             <div class="form-row">
             <input type="text" id="time_search_input" name="time_search_input" class="form-control" size="10">
-            <button type="button" id="time_search_button" name="time_search_button" class="btn btn-light  btn-sm" onclick="TimeSearch()">Search</button>
+            <button type="button" id="time_search_button" name="time_search_button" class="btn btn-light  btn-sm" onclick="onSearchButtononClick()">Search</button>
             </div>
         </form>
     </div>
@@ -127,8 +127,9 @@
 <script type="text/javascript" src="js/updateDataListTable.js"></script>
 <script type="text/javascript" src="js/switchTab.js"></script>
 <script type="text/javascript" src="js/loadFile.js"></script>
-<script type="text/javascript" src="js/TimeTubes.js"></script>
-<script type="text/javascript" src="js/filtering_color.js"></script>
+<!--<script type="text/javascript" src="js/TimeTubes.js"></script>-->
+<script type="text/javascript" src="js/TimeTubesNew.js"></script>
+<script type="text/javascript" src="js/actions.js"></script>
 <script type="x-shader/x-vertex" id="vertexShaderSimple">
 #define MAX_DATASIZE 500
 

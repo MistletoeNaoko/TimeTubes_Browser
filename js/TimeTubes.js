@@ -1,25 +1,17 @@
 // current camera
-let camera;
 // camera_set[0]: Perspective, camera_set[1]: Orthographic
-let camera_set = [];
 // fov, far, etc.
-let camera_para = {};
-let scene;
-let renderer;
-let controls;
-let tube_group;
-let tube;
-let grid;
-let labels = [];
-let axis;
-let plot;
-let clippingPlane;
+let scene, renderer, controls;
+let camera, camera_set = [], camera_prop = {};
+let tube_group, tube, grid, labels = [], axis, plot, clippingPlane;
 let animation_para = {flag: false, dep: 0, dst:0, speed: 40, now: 0};
 let current_focused_idx;
-const segment = 16;
+let GUIoptions;
+
+let segment = 16, tubeNum = 1;
+
 
 const gui = new dat.GUI();
-let GUIoptions;
 
 function init(idx) {
     initializeScene('WebGL-TimeTubes', idx);
@@ -40,16 +32,16 @@ function initializeScene(id, idx) {
     document.addEventListener('wheel', onMouseWheel, false);
     clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
 
-    camera_para['fov'] = 45;
-    camera_para['far'] = Math.ceil(blazarData[idx][blazarNum[idx]['JD'] - 1]['JD'] - blazarData[idx][0]['JD']) + 50;
-    camera_para['depth'] = Math.tan(camera_para['fov'] / 2.0 * Math.PI / 180.0) * 2;
-    camera_para['aspect'] = ($(window).width()) / $(window).height();
-    let size_y = camera_para['depth'] * (50);
-    let size_x = camera_para['depth'] * (50) * camera_para['aspect'];
-    camera_set[0] = new THREE.PerspectiveCamera(45, ($(window).width()) / $(window).height(), 0.1, camera_para['far']);
+    camera_prop['fov'] = 45;
+    camera_prop['far'] = Math.ceil(blazarData[idx][blazarNum[idx]['JD'] - 1]['JD'] - blazarData[idx][0]['JD']) + 50;
+    camera_prop['depth'] = Math.tan(camera_prop['fov'] / 2.0 * Math.PI / 180.0) * 2;
+    camera_prop['aspect'] = ($(window).width()) / $(window).height();
+    let size_y = camera_prop['depth'] * (50);
+    let size_x = camera_prop['depth'] * (50) * camera_prop['aspect'];
+    camera_set[0] = new THREE.PerspectiveCamera(45, ($(window).width()) / $(window).height(), 0.1, camera_prop['far']);
     camera_set[1] = new THREE.OrthographicCamera(
         -size_x / 2, size_x / 2,
-        size_y / 2, -size_y / 2, 0.1, camera_para['far']);
+        size_y / 2, -size_y / 2, 0.1, camera_prop['far']);
     camera = camera_set[0];
     camera.aspect = ($(window).width()) / $(window).height();
     camera.position.x = 0;
@@ -159,7 +151,6 @@ function makeModel (idx) {
     // Create tube based on values of data
     function createTube(texture) {
         let tubeSpline = new THREE.CatmullRomCurve3(points);
-        let tubeNum = 1;
 
         let tubeGeometry;
         let geometries = [];
@@ -413,7 +404,7 @@ function setGUIControls() {
     tubePos.onChange(function (e) {
         tube_group.position.z = e - blazarData[tube_group.userData.idx][0]['JD'];
         showCurrentVal(tube_group.userData.idx, tube_group.position.z);
-    })
+    });
     tube.open();
 
     display = gui.addFolder('Display');
@@ -458,7 +449,7 @@ function setGUIControls() {
         camx = camPos.add(camera.position, 'x', -100, 100).listen();
         camy = camPos.add(camera.position, 'y', -100, 100).listen();
         camz = camPos.add(camera.position, 'z', -100, 100).listen();
-        camfar = cam.add(camera, 'far', 100, camera_para['far']).onChange(function () {
+        camfar = cam.add(camera, 'far', 100, camera_prop['far']).onChange(function () {
             camera.updateProjectionMatrix();
         });
     }
@@ -578,7 +569,7 @@ function changePlotColor(idx, color) {
     }
 }
 
-function TimeSearch() {
+function searchTime() {
     let ele = document.getElementById('time_search_input').value - blazarData[0][0]['JD'];
     if (isNaN(ele)) {
         alert('Please input numbers.');

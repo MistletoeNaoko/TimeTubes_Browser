@@ -10,6 +10,7 @@ class TimeTubes {
         this.numJD = blazarNum[this.idx]['JD'];
 
         this.currentFocusedIdx = 0;
+        this.currentHighlightedPlot = 0;
         this.animationPara = {flag: false, dep: 0, dst:0, speed: 40, now: 0};
     }
 
@@ -64,11 +65,12 @@ class TimeTubes {
     }
 
     // make models such like tube, grid, plots, etc.
-    makeModel(texture, positions, radiuses, colors, spline, minList, maxList) {
+    makeModel(texture) {
         // call drawTube, drawGrid, drawLabels, drawAxis, and drawPlots
         this.tube_group = new THREE.Group();
         this.scene.add(this.tube_group);
-        this._drawTube(texture, positions, radiuses, colors, spline, minList, maxList);
+        this._drawTubeNew(texture);
+        // this._drawTube(texture, positions, radiuses, colors, spline, minList, maxList);
         this._drawGrid(20, 10);
         this._drawLabel(10 / blazarRange[this.idx]);
         this._drawAxis();
@@ -76,6 +78,109 @@ class TimeTubes {
         showCurrentVal(this.idx, this.tube_group.position.z);
         this._setGUIControls();
         this.animate();
+    }
+
+    _drawTubeNew(texture){//texture, spline, minList, maxList) {
+        let maxJD = this.data[this.numJD - 1]['JD'];
+        let range = blazarRange[this.idx];
+        let divNum = 10 * Math.ceil(maxJD - this.minJD);
+        let delTime = (maxJD - this.minJD) / divNum;
+        let divNumPol = Math.ceil((dataSplines[this.idx]['position'].getPoint(1).z - dataSplines[this.idx]['position'].getPoint(0).z) / delTime);
+        let divNumPho = Math.ceil((dataSplines[this.idx]['color'].getPoint(1).z - dataSplines[this.idx]['color'].getPoint(0).z) / delTime);
+        let cen = dataSplines[this.idx]['position'].getSpacedPoints(divNumPol);
+        let rad = dataSplines[this.idx]['error'].getSpacedPoints(divNumPol);
+        let col = dataSplines[this.idx]['color'].getSpacedPoints(divNumPho);
+        let idxGap = Math.ceil((dataSplines[this.idx]['color'].getPoint(0).z - dataSplines[this.idx]['position'].getPoint(0).z) / delTime);
+        let del = Math.PI * 2 / this.segment;
+        let cossin = [];
+        for (let i = 0; i <= this.segment; i++) {
+            let deg = del * i;
+            cossin.push(new THREE.Vector2(Math.cos(deg), Math.sin(deg)));
+        }
+        let indexTmp = [];
+        for (let i = 0; i < this.segment; i++) {
+            indexTmp.push(i);
+            indexTmp.push(i + (this.segment + 1));
+            indexTmp.push(i + 1);
+
+            indexTmp.push(i + (this.segment + 1));
+            indexTmp.push(i + 1 + (this.segment + 1));
+            indexTmp.push(i + 1);
+        }
+        let vertices = [];
+        for (let i = 0; i < this.tubeNum; i++) {
+            vertices[i] = [];
+        }
+        let indices = [];
+        let colors = [];
+        let currentColorX = 0, currentColorY = 0;
+        for (let i = 0; i <= divNumPol; i++) {
+            currentColorX = 0;
+            currentColorY = 0;
+            if (idxGap < i && (i - idxGap) < divNumPho) {
+                currentColorX = col[i - idxGap].x;
+                currentColorY = col[i - idxGap].y;
+            }
+            for (let j = 0; j <= this.segment; j++) {
+                for (let k = 0; k < this.tubeNum; k++) {
+                    let currad = (1 / this.tubeNum) * (k + 1);
+                    vertices[k].push((cen[i].x * range + currad * rad[i].x * range * cossin[j].x) * -1);
+                    vertices[k].push(cen[i].y * range + currad * rad[i].y * range * cossin[j].y);
+                    vertices[k].push(cen[i].z - this.minJD);
+                }
+
+                colors.push(currentColorX);
+                colors.push(currentColorY);
+
+                if (j !== this.segment) {
+                    indices.push(indexTmp[j * 6 + 0] + i * (this.segment + 1));
+                    indices.push(indexTmp[j * 6 + 1] + i * (this.segment + 1));
+                    indices.push(indexTmp[j * 6 + 2] + i * (this.segment + 1));
+                    indices.push(indexTmp[j * 6 + 3] + i * (this.segment + 1));
+                    indices.push(indexTmp[j * 6 + 4] + i * (this.segment + 1));
+                    indices.push(indexTmp[j * 6 + 5] + i * (this.segment + 1));
+                }
+            }
+        }
+        indices = indices.slice(0, -1 * this.segment * 3 * 2);
+        let normals = new Float32Array(vertices[0].length);
+        let geometries = [];
+        for (let i = 0; i < this.tubeNum; i++) {
+            const geometryTmp = new THREE.BufferGeometry();
+            geometryTmp.addAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices[i]), 3));
+            geometryTmp.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
+            geometryTmp.addAttribute('colorData', new THREE.BufferAttribute(new Float32Array(colors), 2));
+            geometryTmp.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+            // geometryTmp.computeFaceNormals();
+            geometryTmp.computeVertexNormals();
+            geometries.push(geometryTmp);
+        }
+        let tubeGeometry = THREE.BufferGeometryUtils.mergeBufferGeometries(geometries);
+        // optional
+        // geometry.computeBoundingBox();
+        // geometry.computeBoundingSphere();
+
+        // compute normals automatically
+        // tubeGeometry.computeFaceNormals();
+        // tubeGeometry.computeVertexNormals();
+
+        let tubeMaterial = new THREE.ShaderMaterial({
+            vertexShader: document.getElementById('vertexShader_tube').textContent,
+            fragmentShader: document.getElementById('fragmentShader_tube').textContent,
+            uniforms: {
+                lightPosition: {value: new THREE.Vector3(-20, 40, 60)},
+                minmaxVJ: {value: new THREE.Vector2(blazarMin[this.idx]['V-J'], blazarMax[this.idx]['V-J'])},
+                minmaxFlx: {value: new THREE.Vector2(blazarMin[this.idx]['Flx(V)'], blazarMax[this.idx]['Flx(V)'])},
+                tubeNum: {value: this.tubeNum},
+                texture: {value: texture}
+            },
+            transparent: true,
+            clipping: true,
+            clippingPlanes: [this.clippingPlane]
+        });
+        this.tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+        this.tube_group.add(this.tube);
+        this.tube.rotateY(Math.PI);
     }
 
     _drawTube(texture, positions, radiuses, colors, spline, minList, maxList) {
@@ -96,6 +201,7 @@ class TimeTubes {
             radiuses: {value: radiuses},
             colors: {value: colors},
             size: {value: this.numJD},
+            length: {value: positions.length},
             lightPosition: {value: new THREE.Vector3(-20, 40, 60)},
             minmaxVJ: {value: new THREE.Vector2(minList['V-J'], maxList['V-J'])},
             minmaxFlx: {value: new THREE.Vector2(minList['Flx(V)'], maxList['Flx(V)'])},
@@ -227,22 +333,23 @@ class TimeTubes {
         let circlePositions = [];
         let circleColor = [];
         let baseColor = new THREE.Color('rgb(127, 255, 212)');
-        let circleIndices = Array(this.numJD * this.segment * 2);
+        let circleIndices = Array(positions[this.idx].length * this.segment * 2);
         let del = Math.PI * 2 / this.segment;
         let range = blazarRange[this.idx];
-        for (let i = 0; i < this.numJD; i++) {
-            let zpos = this.data[i]['JD'] - this.data[0]['JD'];
-            let xcent = -this.data[i]['Q/I'] * range;
-            let ycent = this.data[i]['U/I'] * range;
-            let xrad = this.data[i]['E_Q/I'] * range;
-            let yrad = this.data[i]['E_U/I'] * range;
+        // let plotNum = 0;
+        for (let i = 0; i < positions[this.idx].length; i++) {
+            let zpos = positions[this.idx][i].z - positions[this.idx][0].z;
+            let xcen = -positions[this.idx][i].x * range;
+            let ycen = positions[this.idx][i].y * range;
+            let xrad = radiuses[this.idx][i].x * range;
+            let yrad = radiuses[this.idx][i].y * range;
             // 0-1, 1-2, 2-3, ... , 31-0
             let currentIdx = this.segment * 2 * i;
             circleIndices[currentIdx] = i * this.segment;
             circleIndices[currentIdx + this.segment * 2 - 1] = i * this.segment;
             for (let j = 0; j < this.segment; j++) {
-                circlePositions.push(xcent + xrad * Math.cos(del * j));
-                circlePositions.push(ycent + yrad * Math.sin(del * j));
+                circlePositions.push(xcen + xrad * Math.cos(del * j));
+                circlePositions.push(ycen + yrad * Math.sin(del * j));
                 circlePositions.push(zpos);
 
                 circleColor.push(baseColor.r);
@@ -254,6 +361,32 @@ class TimeTubes {
                     circleIndices[currentIdx + 2 * (j - 1) + 2] = i * this.segment + j;
                 }
             }
+            // if (this.data[i]['Q/I']) {
+            //     let zpos = this.data[i]['JD'] - this.data[0]['JD'];
+            //     let xcent = -this.data[i]['Q/I'] * range;
+            //     let ycent = this.data[i]['U/I'] * range;
+            //     let xrad = this.data[i]['E_Q/I'] * range;
+            //     let yrad = this.data[i]['E_U/I'] * range;
+            //     // 0-1, 1-2, 2-3, ... , 31-0
+            //     let currentIdx = this.segment * 2 * plotNum;
+            //     circleIndices[currentIdx] = plotNum * this.segment;
+            //     circleIndices[currentIdx + this.segment * 2 - 1] = plotNum * this.segment;
+            //     for (let j = 0; j < this.segment; j++) {
+            //         circlePositions.push(xcent + xrad * Math.cos(del * j));
+            //         circlePositions.push(ycent + yrad * Math.sin(del * j));
+            //         circlePositions.push(zpos);
+            //
+            //         circleColor.push(baseColor.r);
+            //         circleColor.push(baseColor.g);
+            //         circleColor.push(baseColor.b);
+            //
+            //         if (j !== 0) {
+            //             circleIndices[currentIdx + 2 * (j - 1) + 1] = plotNum * this.segment + j;
+            //             circleIndices[currentIdx + 2 * (j - 1) + 2] = plotNum * this.segment + j;
+            //         }
+            //     }
+            //     plotNum++;
+            // }
         }
         let circleGeometry = new THREE.BufferGeometry();
         circleGeometry.setIndex(circleIndices);
@@ -434,48 +567,101 @@ class TimeTubes {
     _onMouseWheel() {
         return function(event) {
             // 1 scroll = 100 in deltaY
+            let changeColFlg = false;
             let now = this.tube_group.position.z;
-            let del = this.tube_group.position.z + event.deltaY / 100;
-            if (del < 0) {
-                del = 0;
-            } else if (del > this.data[this.numJD - 1]['JD'] - this.minJD) {
-                del = this.data[this.numJD - 1]['JD'] - this.minJD;
+            let dst = this.tube_group.position.z + event.deltaY / 100;
+            if (dst < 0) {
+                dst = 0;
+            } else if (dst > this.data[this.numJD - 1]['JD'] - this.minJD) {
+                dst = this.data[this.numJD - 1]['JD'] - this.minJD;
             }
-            for (let i = 0; i < this.numJD; i++) {
+            let i;
+            for (i = 0; i < this.numJD; i++) {
                 let tmp = this.data[i]['JD'] - this.minJD;
-                if (Math.min(now, del) < tmp && tmp < Math.max(now, del)) {
-                    del = tmp;
-                    let color = this.gui.__folders.Display.__folders.Plot.__controllers[1].object.plotColor;
-                    this.changePlotColor(this.currentFocusedIdx * this.segment, new THREE.Color(color[0] / 255, color[1] / 255, color[2] / 255));
-                    this.changePlotColor(i * this.segment, new THREE.Color('red'));
+                if (Math.min(now, dst) < tmp && tmp < Math.max(now, dst)) {
+                    dst = tmp;
                     this.currentFocusedIdx = i;
+                    if ('Q/I' in this.data[i])
+                        changeColFlg = true;
                     break;
                 }
             }
-            this.tube_group.position.z = del;
-            this.gui.__folders.Tube.__controllers[0].setValue(del + this.minJD);
-            showCurrentVal(this.idx, del);
-        };
+            if ((dst === this.data[this.numJD - 1]['JD'] - this.minJD) && ('Q/I' in this.data[this.numJD - 1])) {
+                changeColFlg = true;
+            }
+            if (changeColFlg) {
+                console.log(dst);
+                for (let j = 0; j < positions[this.idx].length; j++) {
+                    if (dst === positions[this.idx][j].z - this.minJD) {
+                        // console.log(dst, positions[this.idx][j].z - this.minJD);
+                        let color = this.gui.__folders.Display.__folders.Plot.__controllers[1].object.plotColor;
+                        this.changePlotColor(this.currentHighlightedPlot * this.segment, new THREE.Color(color[0] / 255, color[1] / 255, color[2] / 255));
+                        this.changePlotColor(j * this.segment, new THREE.Color('red'));
+                        this.currentHighlightedPlot = j;
+                    }
+                }
+            }
+            this.tube_group.position.z = dst;
+            this.gui.__folders.Tube.__controllers[0].setValue(dst + this.minJD);
+            showCurrentVal(this.idx, dst);
+        }.bind(this);
     }
 
     // get values of currently focused plot
     getCurrentValues(posZ) {
         // Get the current JD
         let currentJD = posZ + this.minJD;
+
         let i;
-        for (i = 1; i < this.numJD; i++) {
-            if (this.data[i - 1]['JD'] <= currentJD && currentJD < this.data[i]['JD'])
+        for (i = 1; i < positions[this.idx].length; i++) {
+            if (positions[this.idx][i - 1].z <= currentJD && currentJD < positions[this.idx][i].z)
                 break;
         }
-        let u;
-        if (i >= this.numJD - 1) {
-            u = 1;
+        let tPos;
+        if ((currentJD === positions[this.idx][positions[this.idx].length - 1].z) || (i > positions[this.idx].length - 1)) {
+            tPos = 1;
         } else {
-            u = ((i - 1) + (currentJD - this.data[i - 1]['JD']) / (this.data[i]['JD'] - this.data[i - 1]['JD'])) / (this.numJD - 1);
+            tPos = ((i - 1) + (currentJD - positions[this.idx][i - 1].z) / (positions[this.idx][i].z - positions[this.idx][i - 1].z)) / (positions[this.idx].length - 1);
         }
-        let pos = dataSplines[this.idx]['position'].getPoint(u);
-        let err = dataSplines[this.idx]['error'].getPoint(u);
-        let col = dataSplines[this.idx]['error'].getPoint(u);
+
+        let j;
+        for (j = 1; j < colors[this.idx].length; j++) {
+            if (colors[this.idx][j - 1].z <= currentJD && currentJD < colors[this.idx][j].z)
+                break;
+        }
+        let tCol;
+        if (j >= colors[this.idx].length - 1) {
+            tCol = 1;
+        } else {
+            tCol = ((j - 1) + (currentJD - colors[this.idx][j - 1].z) / (colors[this.idx][j].z - colors[this.idx][j - 1].z)) / (colors[this.idx].length - 1);
+        }
+
+        let pos = dataSplines[this.idx]['position'].getPoint(tPos);
+        let err = dataSplines[this.idx]['error'].getPoint(tPos);
+        let col = dataSplines[this.idx]['color'].getPoint(tCol);
+        // for (i = 1; i < this.numJD; i++) {
+        //     if (this.data[i - 1]['JD'] <= currentJD && currentJD < this.data[i]['JD'])
+        //         break;
+        // }
+        // let t;
+        // if (i >= this.numJD - 1) {
+        //     t = 1;
+        // } else {
+        //     t = ((i - 1) + (currentJD - this.data[i - 1]['JD']) / (this.data[i]['JD'] - this.data[i - 1]['JD'])) / (this.numJD - 1);
+        // }
+        // let pos = dataSplines[this.idx]['position'].getPoint(t);
+        // let err = dataSplines[this.idx]['error'].getPoint(t);
+        // let col = dataSplines[this.idx]['color'].getPoint(t);
+        // for (let j = 0; j < this.numJD; j++) {
+        //     u = j / (this.numJD - 1);
+        //     console.log(dataSplines[this.idx]['position'].getPointAt(u), dataSplines[this.idx]['position'].getPoint(u));
+        // }
+        // let points = dataSplines[this.idx]['position'].getSpacedPoints(10 * Math.ceil(this.data[this.numJD - 1]['JD'] - this.minJD) );
+        // points.map(function (value) {
+        //     value.z = value.z - this.minJD;
+        //     return value;
+        // }.bind(this));
+        // console.log(points);
 
         //JD, QI, EQI, UI, EUI, VJ, Flx
         return [pos.z, pos.x, err.x, pos.y, err.y, col.x, col.y];
@@ -493,6 +679,7 @@ class TimeTubes {
             this._moveTube();
         }
     }
+    
     // change the color of the currently focused plot
     changePlotColor(idx, color) {
         for (let i = 0; i < this.segment; i++) {

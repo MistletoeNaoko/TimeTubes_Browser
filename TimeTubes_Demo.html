@@ -104,7 +104,7 @@
 </div>
 <div id="WebGL-TimeTubes"></div>
 <div id="file_input">
-    <b>Select a file type:</b>
+    <b>File type</b>
     <form id="file_type">
         <div class="form-check form-check-inline">
             <input type="radio" name="file_type" value="csv" checked>
@@ -119,9 +119,16 @@
             <label class="form-check-label" for="inlineCheckbox1">space</label>
         </div>
     </form>
+    <b>Initial line of the data (exclude headers)</b>
+    <div class="form-row" id="initial_line_field">
+        <button type="button" id="sub" class="sub btn btn-light  btn-sm">-</button>
+        <input type="text" id="initial_line_input" value="2" class="field form-control" />
+        <button type="button" id="add" class="add btn btn-light  btn-sm">+</button>
+    </div>
+    <!--<input class="form-control" type="text" id="initial_line_input" value="2" size="10">-->
     <div class="custom-file">
-    <input class="custom-file-input" type="file" id="file_upload" onchange="loadFile()">
-    <label class="custom-file-label" for="customFile">Choose file</label>
+        <input class="custom-file-input" type="file" id="file_upload" onchange="loadFile()" multiple>
+        <label class="custom-file-label" for="customFile">Choose file</label>
     </div>
 </div>
 <script type="text/javascript" src="js/updateDataListTable.js"></script>
@@ -130,8 +137,60 @@
 <!--<script type="text/javascript" src="js/TimeTubes.js"></script>-->
 <script type="text/javascript" src="js/TimeTubesNew.js"></script>
 <script type="text/javascript" src="js/actions.js"></script>
+<script type="x-shader/x-vertex" id="vertexShader_tube">
+    precision mediump float;
+
+    attribute vec2 colorData;
+
+    varying vec3 vNormal;
+    varying vec3 vWorldPosition;
+    varying vec2 vColor;
+
+    // How to add clipping planes to shader: https://stackoverflow.com/questions/42532545/add-clipping-to-three-shadermaterial
+    #include <clipping_planes_pars_vertex>
+
+    void main() {
+        #include <begin_vertex>
+        vNormal = normalMatrix * normal;
+        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+        vWorldPosition = worldPosition.xyz;
+        vColor = colorData;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        #include <clipping_planes_vertex>
+    }
+</script>
+<script type="x-shader/x-fragment" id="fragmentShader_tube">
+    precision mediump float;
+
+    varying vec3 vNormal;
+    varying vec3 vWorldPosition;
+    varying vec2 vColor;
+
+    uniform vec3 lightPosition;
+    uniform vec2 minmaxVJ;
+    uniform vec2 minmaxFlx;
+    uniform sampler2D texture;
+    uniform int tubeNum;
+
+    #include <clipping_planes_pars_fragment>
+
+    void main()
+    {
+        #include <clipping_planes_fragment>
+
+        vec3 lightDirection = normalize(lightPosition - vWorldPosition);
+        vec2 T;
+        T.x = (vColor.x - minmaxVJ.x) / (minmaxVJ.y - minmaxVJ.x);
+        T.y = (vColor.y - minmaxFlx.x) / (minmaxFlx.y - minmaxFlx.x);
+        vec4 resultColor = texture2D(texture, T);
+        float c = max(0.0, dot(vNormal, lightDirection)) * 0.3;
+        float opacity = 1.0 / float(tubeNum);//vPositionx;//vWorldPosition.x;//1.0 / float(TUBE_NUM);
+        gl_FragColor = vec4(resultColor.r + c, resultColor.g + c, resultColor.b + c, opacity);
+    }
+</script>
 <script type="x-shader/x-vertex" id="vertexShaderSimple">
-#define MAX_DATASIZE 500
+#define MAX_DATASIZE 1300
 
 precision mediump float;
 
@@ -192,18 +251,18 @@ vec2 InterpColor(int idx, float del)
 void main()
 {
     #include <begin_vertex>
-    //vPositionx = sqrt(position.x * position.x + position.y * position.y);
     // Pass information on the pixel to the fragment shader to add shade
     vNormal = normalMatrix * normal;
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vWorldPosition = worldPosition.xyz;
+
 
     // Compute interpolated values for the current pixel
     float Tx = floor(position.z);
     int   Ti = int(Tx);
     float Td = position.z - Tx;
     vDisFlag = 1.0;
-    if (Ti >= size)
+    if (Ti >= size)// || position.z >= maxZ)
         vDisFlag = 0.0;
     vec3 currentPos;
     vec2 currentRad;
@@ -232,19 +291,18 @@ void main()
 </script>
 
 <script id="fragmentShader" type="x-shader/x-fragment">
-#define MAX_DATASIZE 500
+#define MAX_DATASIZE 1300
 #define TUBE_NUM 1
 
 precision mediump float;
 
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
-varying float vPositionx;
+//varying float vPositionx;
 varying vec2 vColor;
 varying float vDisFlag;
 
 uniform vec3 lightPosition;
-uniform vec2 colors[MAX_DATASIZE];
 uniform vec2 minmaxVJ;
 uniform vec2 minmaxFlx;
 uniform sampler2D texture;

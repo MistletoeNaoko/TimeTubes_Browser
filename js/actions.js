@@ -19,7 +19,7 @@ function showCurrentVal(idx, pos) {
     if (idx === currentIdx) {
         let currentval = timetubes[currentIdx].getCurrentValues(pos);
         let JD = document.getElementById('JD_value');
-        JD.innerHTML = currentval[0].toFixed(2);
+        JD.innerHTML = currentval[0].toFixed(3);
         let QI = document.getElementById('QI_value');
         QI.innerHTML = currentval[1].toFixed(4);
         let EQI = document.getElementById('EQI_value');
@@ -100,3 +100,10 @@ $( function() {
     $('#color_hue_min').val($('#color_hue').slider('values', 0));
     $('#color_hue_max').val($('#color_hue').slider('values', 1));
 } );
+
+$('.add').click(function () {
+    $(this).prev().val(+$(this).prev().val() + 1);
+});
+$('.sub').click(function () {
+    if ($(this).next().val() > 0) $(this).next().val(+$(this).next().val() - 1);
+});

@@ -225,3 +225,31 @@ output {
     height: 30px;
     width: 35%;
 }
+
+#initial_line_input {
+    height: 30px;
+    width: 40px;
+    margin: 5px 5px 10px 5px;
+    text-align: center;
+    /*display:block;*/
+    /*margin-bottom: 10px;*/
+}
+
+#initial_line_field {
+    display: flex;
+    justify-content: center;
+}
+
+.sub {
+    height: 30px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.add {
+    height: 30px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}

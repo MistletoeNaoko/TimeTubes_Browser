@@ -172,6 +172,7 @@
     uniform vec2 minmaxFlx;
     uniform sampler2D texture;
     uniform int tubeNum;
+    uniform bool shade;
 
     #include <clipping_planes_pars_fragment>
 
@@ -186,7 +187,10 @@
         vec4 resultColor = texture2D(texture, T);
         float c = max(0.0, dot(vNormal, lightDirection)) * 0.3;
         float opacity = 1.0 / float(tubeNum);//vPositionx;//vWorldPosition.x;//1.0 / float(TUBE_NUM);
-        gl_FragColor = vec4(resultColor.r + c, resultColor.g + c, resultColor.b + c, opacity);
+        if (shade)
+            gl_FragColor = vec4(resultColor.r + c, resultColor.g + c, resultColor.b + c, opacity);
+        else
+            gl_FragColor = vec4(resultColor.r, resultColor.g, resultColor.b, opacity);
     }
 </script>
 <script type="x-shader/x-vertex" id="vertexShaderSimple">

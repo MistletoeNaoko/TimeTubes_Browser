@@ -172,8 +172,10 @@ class TimeTubes {
                 minmaxVJ: {value: new THREE.Vector2(blazarMin[this.idx]['V-J'], blazarMax[this.idx]['V-J'])},
                 minmaxFlx: {value: new THREE.Vector2(blazarMin[this.idx]['Flx(V)'], blazarMax[this.idx]['Flx(V)'])},
                 tubeNum: {value: this.tubeNum},
+                shade: {value: true},
                 texture: {value: texture}
             },
+            side: THREE.DoubleSide,
             transparent: true,
             clipping: true,
             clippingPlanes: [this.clippingPlane]
@@ -445,6 +447,7 @@ class TimeTubes {
                 addCameraControl.bind(this);
             }.bind(this),
             tubePosition: this.minJD,
+            shade: true,
             grid: true,
             label: true,
             axis: true,
@@ -475,6 +478,10 @@ class TimeTubes {
             showCurrentVal(this.idx, this.tube_group.position.z);
         };
         tubePos.onChange(tubePositionChange.bind(this));
+        let shadeonChange = function() {
+            this.tube.material.uniforms.shade.value = this.GUIoptions.shade;
+        };
+        tube.add(this.GUIoptions, 'shade').onChange(shadeonChange.bind(this));
         tube.open();
 
         // folder for display controllers
@@ -679,7 +686,7 @@ class TimeTubes {
             this._moveTube();
         }
     }
-    
+
     // change the color of the currently focused plot
     changePlotColor(idx, color) {
         for (let i = 0; i < this.segment; i++) {

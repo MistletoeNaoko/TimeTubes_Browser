@@ -3,9 +3,10 @@ let currentIdx = 0;
 window.addEventListener( 'resize', onWindowResize, false );
 
 function onWindowResize() {
-    timetubes[currentIdx].camera.aspect = $(window).width() / $(window).height();
+    let element = document.getElementById('WebGL-TimeTubes');
+    timetubes[currentIdx].camera.aspect = element.clientWidth / $(window).height();
     timetubes[currentIdx].camera.updateProjectionMatrix();
-    timetubes[currentIdx].renderer.setSize($(window).width(), $(window).height());
+    timetubes[currentIdx].renderer.setSize(element.clientWidth, $(window).height());
 }
 
 function onSearchButtononClick() {
@@ -36,23 +37,26 @@ function showCurrentVal(idx, pos) {
 }
 
 $( function() {
-    $("#color_value").slider({
+    let value = $("#color_value");
+    let vMin = $('#color_value_min');
+    let vMax = $('#color_value_max');
+    value.slider({
         range: true,
         min: 0,
         max: 100,
         values: [ 0, 100 ],
         orientation: "vertical",
         slide: function (event, ui) {
-            $('#color_value_min').css('display', 'initial');
-            $('#color_value_max').css('display', 'initial');
-            $('#color_value_min').val(ui.values[0]);
-            $('#color_value_max').val(ui.values[1]);
-            let min = $('#color_value').slider("option", "min");
-            let range = $('#color_value').slider("option", "max") - min;
+            vMin.css('display', 'initial');
+            vMax.css('display', 'initial');
+            vMin.val(ui.values[0]);
+            vMax.val(ui.values[1]);
+            let min = value.slider("option", "min");
+            let range = value.slider("option", "max") - min;
             let minPos = -10 + 150 * (ui.values[0] - min) / range;
             let maxPos = -10 + 150 - 150 * (ui.values[1] - min) / range;
-            $('#color_value_min').css('bottom', minPos + 'px');
-            $('#color_value_max').css('top', maxPos + 'px');
+            vMin.css('bottom', minPos + 'px');
+            vMax.css('top', maxPos + 'px');
             if (blazarData[currentIdx].length !== 0) {
                 let rangeFL = blazarMax[currentIdx]['Flx(V)'] - blazarMin[currentIdx]['Flx(V)'];
                 timetubes[currentIdx].tube.material.uniforms.minmaxFlx.value = new THREE.Vector2(
@@ -61,30 +65,33 @@ $( function() {
             }
         },
         stop: function () {
-            $('#color_value_min').css('display', 'none');
-            $('#color_value_max').css('display', 'none');
+            vMin.css('display', 'none');
+            vMax.css('display', 'none');
         }
     });
-    $('#color_value_min').val($('#color_value').slider('values', 0));
-    $('#color_value_max').val($('#color_value').slider('values', 1));
+    vMin.val(value.slider('values', 0));
+    vMax.val(value.slider('values', 1));
 } );
 
 $( function() {
-    $( "#color_hue" ).slider({
+    let hue = $( "#color_hue" );
+    let hMin = $('#color_hue_min');
+    let hMax = $('#color_hue_max');
+    hue.slider({
         range: true,
         min: 0,
         max: 100,
         values: [ 0, 100 ],
         // orientation: "horizontal"
         slide: function( event, ui ) {
-            $('#color_hue_min').css('display', 'initial');
-            $('#color_hue_max').css('display', 'initial');
-            $('#color_hue_min').val(ui.values[0]);
-            $('#color_hue_max').val(ui.values[1]);
+            hMin.css('display', 'initial');
+            hMax.css('display', 'initial');
+            hMin.val(ui.values[0]);
+            hMax.val(ui.values[1]);
             let minPos = -35 + 150 * ui.values[0] / 100;
             let maxPos = -20 + 150 - 150 * ui.values[1] / 100;
-            $('#color_hue_min').css('left', minPos + 'px');
-            $('#color_hue_max').css('right', maxPos + 'px');
+            hMin.css('left', minPos + 'px');
+            hMax.css('right', maxPos + 'px');
             if (blazarData[currentIdx].length !== 0) {
                 let rangeVJ = blazarMax[currentIdx]['V-J'] - blazarMin[currentIdx]['V-J'];
                 timetubes[currentIdx].tube.material.uniforms.minmaxVJ.value = new THREE.Vector2(
@@ -93,12 +100,12 @@ $( function() {
             }
         },
         stop: function () {
-            $('#color_hue_min').css('display', 'none');
-            $('#color_hue_max').css('display', 'none');
+            hMin.css('display', 'none');
+            hMax.css('display', 'none');
         }
     });
-    $('#color_hue_min').val($('#color_hue').slider('values', 0));
-    $('#color_hue_max').val($('#color_hue').slider('values', 1));
+    hMin.val(hue.slider('values', 0));
+    hMax.val(hue.slider('values', 1));
 } );
 
 $('.add').click(function () {
@@ -106,4 +113,24 @@ $('.add').click(function () {
 });
 $('.sub').click(function () {
     if ($(this).next().val() > 0) $(this).next().val(+$(this).next().val() - 1);
+});
+
+$('#close_value_panel').click( function()
+{
+    $('#panel_main_area').slideToggle();
+    if (this.innerText.match('Close')) {
+        this.innerText = 'Open the panel';
+    } else {
+        this.innerText = 'Close the panel';
+    }
+});
+
+$('#close_file_panel').click( function()
+{
+    $('#file_main_area').slideToggle();
+    if (this.innerText.match('Close')) {
+        this.innerText = 'Open the panel';
+    } else {
+        this.innerText = 'Close the panel';
+    }
 });

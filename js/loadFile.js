@@ -131,6 +131,7 @@ function extractNecessaryData(headers, data) {
         result[i] = {};
         let polar = data[i]['Q/I'] || data[i]['< q >'];//Math.max(data[i].indexOf('Q/I'), data[i].indexOf('< q >'));
         let photo = data[i]['Flx(V)'] || data[i]['V'];//Math.max(data[i].indexOf('Flx(V)'), data[i].indexOf('V'));
+        console.log(polar, photo);
         if (polar && photo) {
             for (let key in dataHeaders['HU']) {
                 result[i][key] = data[i][dataHeaders['HU'][key]];
@@ -180,7 +181,7 @@ function renderTimeTubes(idx, files) {
     calcSplines(idx);
 
     timetubes.push(new TimeTubes(idx));
-    timetubes[idx].initScene('WebGL-TimeTubes');
+    timetubes[idx].initScene('TimeTubes_container');
     default_texture = new THREE.TextureLoader();
     default_texture.load('img/1_256.png', function (texture) {
         timetubes[idx].makeModel(texture);

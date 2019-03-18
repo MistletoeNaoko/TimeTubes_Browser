@@ -36,6 +36,10 @@ function showCurrentVal(idx, pos) {
     }
 }
 
+function  onClickShowScatterPlot() {
+    setScatterplots(currentIdx, 'JD', 'Flx(V)');
+}
+
 $( function() {
     let value = $("#color_value");
     let vMin = $('#color_value_min');

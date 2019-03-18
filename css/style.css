@@ -42,9 +42,9 @@ output {
 }
 
 .table_values td {
-    padding: 3px 10px;
+    padding: 1px 10px;
     text-align: left;
-    border: 1px solid #a9a9a9;
+    border: 1px solid lightgray;
 }
 
 .label_values {
@@ -60,7 +60,7 @@ output {
 .menu {
     color: white;
     position: absolute;
-    padding: 15px 10px;
+    /*padding: 0px 10px 0px 10px;*/
 }
 
 .scrollbox {
@@ -145,7 +145,7 @@ output {
 #file_input {
     color: white;
     background: rgba(0, 0, 0, 0.75);
-    padding: 15px 10px;
+    width: 330px;
     position: absolute;
     left: 0;
     bottom: 0;
@@ -161,6 +161,7 @@ output {
 
 #WebGL-TimeTubes {
     z-index: 1;
+    position: relative;
 }
 
 #observation_period {
@@ -253,3 +254,83 @@ output {
     margin-bottom: 10px;
     text-align: center;
 }
+
+.vis_space {
+    overflow: hidden;
+}
+
+.float_vis {
+    float: left;
+    width: 50%;
+}
+
+#panel_main_area {
+    margin: 0px 10px 0px 10px;
+    padding-bottom: 5px;
+}
+
+.close_panel {
+    border-top: 1px solid rgba(255,255,255,0.2);
+    border-bottom: 1px solid rgba(255,255,255,0.2);;
+    padding: 3px 0px;
+    text-align: center;
+    font-size: small;
+}
+
+#file_main_area {
+    padding: 15px 10px;
+}
+
+/*#scatterplots {*/
+    /*width: 50%;*/
+/*}*/
+
+/* 軸のスタイル */
+g.x_axis path, g.y_axis path {
+    stroke: lightgray;
+    stroke-width: 1px;
+}
+
+/* 罫線スタイル */
+g.x_axis line, g.y_axis line{
+    stroke: lightgray;
+    stroke-opacity: 0.7;
+    shape-rendering: crispEdges;
+}
+
+.tooltip {
+    padding: 3px 10px 3px 10px;
+    position: absolute;
+    /*width: 200px;*/
+    /*height: 80px;*/
+    pointer-events: none;
+    background: white;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+}
+
+#scatterplots {
+    float: left;
+    overflow: hidden;
+}
+
+#scatter_container {
+    float: left;
+    /*width: 80%;*/
+}
+
+#scatter_detail {
+    float: right;
+    background: white;
+    padding: 10px;
+    /*margin: 30px 10px 30px 10px;*/
+    /*border: solid thin lightgray;*/
+}
+
+#datGUI {
+    right: 0px;
+    top: 0px;
+    position: absolute;
+}
+
+/*.scatter_detail_panel {*/
+/*}*/

@@ -17,14 +17,15 @@ class TimeTubes {
     // initialize scene or other general variables independent on data
     initScene(id) {
         // general components for Three.js
+        let element = document.getElementById(id);
         this.renderer = new THREE.WebGLRenderer();
         this.scene = new THREE.Scene();
         this.clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
         this.renderer.setClearColor(new THREE.Color(0x000000), 1.0);
-        this.renderer.setSize($(window).width(), $(window).height());
+        this.renderer.setSize(element.clientWidth, $(window).height());
         this.renderer.localClippingEnabled = true;
 
-        document.getElementById(id).appendChild(this.renderer.domElement);
+        element.appendChild(this.renderer.domElement);
         let onMouseWheel = this._onMouseWheel();
         document.addEventListener('wheel', onMouseWheel.bind(this), false);
 
@@ -32,13 +33,13 @@ class TimeTubes {
         this.camera_prop['fov'] = 45;
         this.camera_prop['far'] = Math.ceil(this.data[this.numJD - 1]['JD'] - this.minJD) + 50;
         this.camera_prop['depth'] = Math.tan(this.camera_prop['fov'] / 2.0 * Math.PI / 180.0) * 2;
-        this.camera_prop['aspect'] = ($(window).width()) / $(window).height();
+        this.camera_prop['aspect'] = element.clientWidth / $(window).height();
         let size_y = this.camera_prop['depth'] * (50);
         let size_x = this.camera_prop['depth'] * (50) * this.camera_prop['aspect'];
         this.camera_set = [];
         this.camera_set[0] = new THREE.PerspectiveCamera(
             45,
-            $(window).width() / $(window).height(),
+            element.clientWidth / $(window).height(),
             0.1,
             this.camera_prop['far']);
         this.camera_set[1] = new THREE.OrthographicCamera(
@@ -46,7 +47,7 @@ class TimeTubes {
             size_y / 2, -size_y / 2, 0.1,
             this.camera_prop['far']);
         this.camera = this.camera_set[0];
-        this.camera.aspect = ($(window).width()) / $(window).height();
+        this.camera.aspect = element.clientWidth / $(window).height();
         this.camera.position.x = 0;
         this.camera.position.y = 0;
         this.camera.position.z = 50;
@@ -59,8 +60,8 @@ class TimeTubes {
         this.scene.add(ambientLight);
         this.grid = new THREE.GridHelper(20, 10, 'white', 'limegreen');
 
-        this.gui = new dat.GUI();
-
+        this.gui = new dat.GUI({ autoPlace: false });
+        let guiContainer = $('#datGUI').append($(this.gui.domElement));
         this._addControls();
     }
 
@@ -504,7 +505,8 @@ class TimeTubes {
         display.add(this.GUIoptions, 'axis').onChange(axisonChange.bind(this));
         // folder for plot controllers
         plotGUIs = display.addFolder('Plot');
-        // plot controller
+        // plot controll
+        // er
         let plotonChange = function () {
             this.plot.visible = this.GUIoptions.plot;
         };
@@ -558,13 +560,14 @@ class TimeTubes {
             this.animationPara.now += 1;
             let anim = (1 - Math.cos(Math.PI * this.animationPara.now / this.animationPara.speed)) / 2;
             this.tube_group.position.z = this.animationPara.dep + (this.animationPara.dst - this.animationPara.dep) * anim;
-            if (this.animationPara.now == this.animationPara.speed) {
+            if (this.animationPara.now === this.animationPara.speed) {
+                showCurrentVal(this.idx, this.animationPara.dst);
                 this.animationPara.flag = false;
                 this.animationPara.now = 0;
                 this.animationPara.dep = 0;
                 this.animationPara.dst = 0;
             }
-        }else {
+        } else {
             this.animationPara.flag = false;
             this.animationPara.dst = 0;
         }
@@ -596,15 +599,18 @@ class TimeTubes {
             if ((dst === this.data[this.numJD - 1]['JD'] - this.minJD) && ('Q/I' in this.data[this.numJD - 1])) {
                 changeColFlg = true;
             }
+            if ((dst === this.data[0]['JD'] - this.minJD) && ('Q/I' in this.data[0])) {
+                changeColFlg = true;
+            }
+
             if (changeColFlg) {
-                console.log(dst);
                 for (let j = 0; j < positions[this.idx].length; j++) {
                     if (dst === positions[this.idx][j].z - this.minJD) {
-                        // console.log(dst, positions[this.idx][j].z - this.minJD);
                         let color = this.gui.__folders.Display.__folders.Plot.__controllers[1].object.plotColor;
                         this.changePlotColor(this.currentHighlightedPlot * this.segment, new THREE.Color(color[0] / 255, color[1] / 255, color[2] / 255));
                         this.changePlotColor(j * this.segment, new THREE.Color('red'));
                         this.currentHighlightedPlot = j;
+                        highlightCurrentPlot(this.idx, dst);
                     }
                 }
             }
@@ -672,6 +678,10 @@ class TimeTubes {
 
         //JD, QI, EQI, UI, EUI, VJ, Flx
         return [pos.z, pos.x, err.x, pos.y, err.y, col.x, col.y];
+    }
+
+    getPlotColor() {
+        return this.GUIoptions.plotColor;
     }
 
     // navigate subspaces by observation time

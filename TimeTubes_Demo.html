@@ -18,117 +18,135 @@
     <script type="text/javascript" src="js/lib/OrbitControls.js"></script>
     <script type="text/javascript" src="js/lib/BufferGeometryUtils.js"></script>
     <script type="text/javascript" src="js/lib/dat.gui.min.js"></script>
+    <script src="https://unpkg.com/split.js/dist/split.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.0/css/ion.rangeSlider.min.css"/>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
     <!--<link rel="stylesheet" href="/resources/demos/style.css">-->
 </head>
 <body>
 <div id="panel_values" class="menu">
-    <div id="file_names"></div>
-    <div id="color_filter">
-        <div id="color_value">
-            <output id="color_value_max"></output>
-            <output id="color_value_min"></output>
+    <div id="panel_main_area">
+        <div id="file_names"></div>
+        <div id="color_filter">
+            <div id="color_value">
+                <output id="color_value_max"></output>
+                <output id="color_value_min"></output>
+            </div>
+            <div id="color_map">
+                <label for="file_photo">
+                    <img src="img/1_256.png" width="150" height="150">
+                    <!--style="margin-left: 30px;">-->
+                    <!--<input type="file" id="file_photo" style="display:none;">-->
+                </label>
+            </div>
+            <div style='clear:both'></div>
+            <div id="color_hue">
+                <output id="color_hue_max"></output>
+                <output id="color_hue_min"></output>
+            </div>
         </div>
-        <div id="color_map">
-            <label for="file_photo">
-                <img src="img/1_256.png" width="150" height="150">
-                <!--style="margin-left: 30px;">-->
-                <!--<input type="file" id="file_photo" style="display:none;">-->
-            </label>
+        <div id="slider-hue"></div>
+        <div id="values">
+            <div id="observation_period">
+                <div class="panel_label">
+                    Observation period
+                </div>
+                <div id="observation_period_values">
+                     -
+                </div>
+            </div>
+            <div id="current_values">
+                <div class="panel_label">
+                    Current values
+                </div>
+                <table class="table_values">
+                    <tr>
+                        <td class="label_values"><i>JD</i></td>
+                        <td class="current_values" id="JD_value"></td>
+                    </tr>
+                    <tr>
+                        <td class="label_values"><i>Q/I</i></td>
+                        <td class="current_values" id="QI_value"></td>
+                    </tr>
+                    <tr>
+                        <td class="label_values"><i>E_Q/I</i></td>
+                        <td class="current_values"id="EQI_value"></td>
+                    </tr>
+                    <tr>
+                        <td class="label_values"><i>U/I</i></td>
+                        <td class="current_values" id="UI_value"></td>
+                    </tr>
+                    <tr>
+                        <td class="label_values"><i>E_U/I</i></td>
+                        <td class="current_values" id="EUI_value"></td>
+                    </tr>
+                    <tr>
+                        <td class="label_values"><i>V-J</i></td>
+                        <td class="current_values" id="VJ_value"></td>
+                    </tr>
+                    <tr>
+                        <td class="label_values"><i>Flx(V)</i></td>
+                        <td class="current_values" id="FL_value"></td>
+                    </tr>
+                </table>
+            </div>
         </div>
-        <div style='clear:both'></div>
-        <div id="color_hue">
-            <output id="color_hue_max"></output>
-            <output id="color_hue_min"></output>
-        </div>
-    </div>
-    <div id="slider-hue"></div>
-    <div id="values">
-        <div id="observation_period">
+        <div id="time_search">
             <div class="panel_label">
-                Observation period
+                Time search
             </div>
-            <div id="observation_period_values">
-                 -
-            </div>
+            <form id="time_search_form">
+                <div class="form-row">
+                <input type="text" id="time_search_input" name="time_search_input" class="form-control" size="10">
+                <button type="button" id="time_search_button" name="time_search_button" class="btn btn-light  btn-sm" onclick="onSearchButtononClick()">Search</button>
+                </div>
+            </form>
         </div>
-        <div id="current_values">
-            <div class="panel_label">
-                Current values
-            </div>
-            <table class="table_values">
-                <tr>
-                    <td class="label_values"><i>JD</i></td>
-                    <td class="current_values" id="JD_value"></td>
-                </tr>
-                <tr>
-                    <td class="label_values"><i>Q/I</i></td>
-                    <td class="current_values" id="QI_value"></td>
-                </tr>
-                <tr>
-                    <td class="label_values"><i>E_Q/I</i></td>
-                    <td class="current_values"id="EQI_value"></td>
-                </tr>
-                <tr>
-                    <td class="label_values"><i>U/I</i></td>
-                    <td class="current_values" id="UI_value"></td>
-                </tr>
-                <tr>
-                    <td class="label_values"><i>E_U/I</i></td>
-                    <td class="current_values" id="EUI_value"></td>
-                </tr>
-                <tr>
-                    <td class="label_values"><i>V-J</i></td>
-                    <td class="current_values" id="VJ_value"></td>
-                </tr>
-                <tr>
-                    <td class="label_values"><i>Flx(V)</i></td>
-                    <td class="current_values" id="FL_value"></td>
-                </tr>
-            </table>
-        </div>
+        <button onclick="onClickShowScatterPlot()">Scatterplots</button>
     </div>
-    <div id="time_search">
-        <div class="panel_label">
-            Time search
-        </div>
-        <form id="time_search_form">
-            <div class="form-row">
-            <input type="text" id="time_search_input" name="time_search_input" class="form-control" size="10">
-            <button type="button" id="time_search_button" name="time_search_button" class="btn btn-light  btn-sm" onclick="onSearchButtononClick()">Search</button>
-            </div>
-        </form>
-    </div>
+    <div class="close_panel" id="close_value_panel">Close the panel</div>
     <!--<input id="ex2" type="text" class="span2" value="" data-slider-min="10" data-slider-max="1000" data-slider-step="5" data-slider-value="[250,450]"/>-->
 </div>
-<div id="WebGL-TimeTubes"></div>
-<div id="file_input">
-    <b>File type</b>
-    <form id="file_type">
-        <div class="form-check form-check-inline">
-            <input type="radio" name="file_type" value="csv" checked>
-            <label class="form-check-label" for="inlineCheckbox1">csv</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input type="radio" name="file_type" value="tsv">
-            <label class="form-check-label" for="inlineCheckbox1">tsv</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input type="radio" name="file_type" value="space">
-            <label class="form-check-label" for="inlineCheckbox1">space</label>
-        </div>
-    </form>
-    <b>Initial line of the data (exclude headers)</b>
-    <div class="form-row" id="initial_line_field">
-        <button type="button" id="sub" class="sub btn btn-light  btn-sm">-</button>
-        <input type="text" id="initial_line_input" value="2" class="field form-control" />
-        <button type="button" id="add" class="add btn btn-light  btn-sm">+</button>
+<div class="vis_space">
+    <div class="float_vis" id="WebGL-TimeTubes">
+        <div id="TimeTubes_container"></div>
+        <div id="datGUI"></div>
     </div>
-    <!--<input class="form-control" type="text" id="initial_line_input" value="2" size="10">-->
-    <div class="custom-file">
-        <input class="custom-file-input" type="file" id="file_upload" onchange="loadFile()" multiple>
-        <label class="custom-file-label" for="customFile">Choose file</label>
+    <div class="float_vis" id="scatterplots">
+        <div id="scatter_container"></div>
+        <div id="scatter_detail"></div>
+    </div>
+</div>
+<div id="file_input">
+    <div class="close_panel" id="close_file_panel">Close the panel</div>
+    <div id="file_main_area">
+        <b>File type</b>
+        <form id="file_type">
+            <div class="form-check form-check-inline">
+                <input type="radio" name="file_type" value="csv" checked>
+                <label class="form-check-label" for="inlineCheckbox1">csv</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="radio" name="file_type" value="tsv">
+                <label class="form-check-label" for="inlineCheckbox1">tsv</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="radio" name="file_type" value="space">
+                <label class="form-check-label" for="inlineCheckbox1">space</label>
+            </div>
+        </form>
+        <b>Initial line of the data (exclude headers)</b>
+        <div class="form-row" id="initial_line_field">
+            <button type="button" id="sub" class="sub btn btn-light  btn-sm">-</button>
+            <input type="text" id="initial_line_input" value="2" class="field form-control" />
+            <button type="button" id="add" class="add btn btn-light  btn-sm">+</button>
+        </div>
+        <!--<input class="form-control" type="text" id="initial_line_input" value="2" size="10">-->
+        <div class="custom-file">
+            <input class="custom-file-input" type="file" id="file_upload" onchange="loadFile()" multiple>
+            <label class="custom-file-label" for="customFile">Choose file</label>
+        </div>
     </div>
 </div>
 <script type="text/javascript" src="js/updateDataListTable.js"></script>
@@ -137,6 +155,7 @@
 <!--<script type="text/javascript" src="js/TimeTubes.js"></script>-->
 <script type="text/javascript" src="js/TimeTubesNew.js"></script>
 <script type="text/javascript" src="js/actions.js"></script>
+<script type="text/javascript" src="js/scatterplots.js"></script>
 <script type="x-shader/x-vertex" id="vertexShader_tube">
     precision mediump float;
 

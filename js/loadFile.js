@@ -131,7 +131,6 @@ function extractNecessaryData(headers, data) {
         result[i] = {};
         let polar = data[i]['Q/I'] || data[i]['< q >'];//Math.max(data[i].indexOf('Q/I'), data[i].indexOf('< q >'));
         let photo = data[i]['Flx(V)'] || data[i]['V'];//Math.max(data[i].indexOf('Flx(V)'), data[i].indexOf('V'));
-        console.log(polar, photo);
         if (polar && photo) {
             for (let key in dataHeaders['HU']) {
                 result[i][key] = data[i][dataHeaders['HU'][key]];

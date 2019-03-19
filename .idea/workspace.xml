@@ -2,11 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54f264b0-4a6a-4188-b6a7-9c6f14ab4bc0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TimeTubes_Demo.html" beforeDir="false" afterPath="$PROJECT_DIR$/TimeTubes_Demo.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/TimeTubesNew.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/TimeTubesNew.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/actions.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/actions.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js/loadFile.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/loadFile.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js/scatterplots.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/scatterplots.js" afterDir="false" />
     </list>
@@ -51,8 +46,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/loadFile.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="535">
-              <caret line="132" column="20" selection-start-line="131" selection-start-column="20" selection-end-line="132" selection-end-column="20" />
+            <state relative-caret-position="242">
+              <caret line="132" column="114" selection-start-line="132" selection-start-column="114" selection-end-line="132" selection-end-column="114" />
               <folding>
                 <element signature="n#!!block;n#showFileName#0" />
                 <element signature="n#!!block;n#showObservationPeriod#0" />
@@ -68,8 +63,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/scatterplots.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
-              <caret line="73" column="50" selection-start-line="73" selection-start-column="50" selection-end-line="73" selection-end-column="50" />
+            <state relative-caret-position="-3675">
+              <caret line="67" column="61" selection-start-line="67" selection-start-column="61" selection-end-line="67" selection-end-column="61" />
             </state>
           </provider>
         </entry>
@@ -120,7 +115,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>clippi</find>
       <find>addCon</find>
       <find>control</find>
       <find>current_fo</find>
@@ -148,8 +142,9 @@
       <find>menu</find>
       <find>web</find>
       <find>label_values</find>
-      <find>conso</find>
       <find>posit</find>
+      <find>con</find>
+      <find>conso</find>
     </findStrings>
     <replaceStrings>
       <replace>push</replace>
@@ -195,7 +190,7 @@
     <auto-save>true</auto-save>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="953" />
+    <option name="x" value="-7" />
     <option name="width" value="974" />
     <option name="height" value="1047" />
   </component>
@@ -338,19 +333,19 @@
       <workItem from="1551558030869" duration="13855000" />
       <workItem from="1551629092843" duration="23504000" />
       <workItem from="1551812915693" duration="109594000" />
-      <workItem from="1552491828988" duration="95690000" />
+      <workItem from="1552491828988" duration="120665000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="590909000" />
+    <option name="totallyTimeSpent" value="615884000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.483835" visible="true" weight="0.10432034" />
-      <window_info id="Structure" order="1" sideWeight="0.516165" side_tool="true" visible="true" weight="0.10432034" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48423424" weight="0.21153846" />
+      <window_info id="Structure" order="1" sideWeight="0.5157658" side_tool="true" weight="0.21153846" />
       <window_info id="Favorites" order="2" sideWeight="0.50678176" side_tool="true" weight="0.33034775" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3277592" />
@@ -562,8 +557,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/loadFile.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="535">
-          <caret line="132" column="20" selection-start-line="131" selection-start-column="20" selection-end-line="132" selection-end-column="20" />
+        <state relative-caret-position="242">
+          <caret line="132" column="114" selection-start-line="132" selection-start-column="114" selection-end-line="132" selection-end-column="114" />
           <folding>
             <element signature="n#!!block;n#showFileName#0" />
             <element signature="n#!!block;n#showObservationPeriod#0" />
@@ -577,8 +572,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/scatterplots.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="73" column="50" selection-start-line="73" selection-start-column="50" selection-end-line="73" selection-end-column="50" />
+        <state relative-caret-position="-3675">
+          <caret line="67" column="61" selection-start-line="67" selection-start-column="61" selection-end-line="67" selection-end-column="61" />
         </state>
       </provider>
     </entry>
